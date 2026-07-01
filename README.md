@@ -8,8 +8,8 @@ Production-grade peer-to-peer and dealer marketplace for used cars in India.
 |-----|-------|------|
 | API | Python 3.12, FastAPI, PostgreSQL, Redis | `api/` |
 | Web | Next.js 15, TypeScript, Tailwind CSS | `web/` |
-| Android | Kotlin, Jetpack Compose | `android/` |
-| iOS | Swift, SwiftUI | `ios/` |
+| **Android app** | Kotlin + Jetpack Compose — login, home, search, detail | `android/` |
+| **iOS app** | Swift + SwiftUI — login, home, search, detail | `ios/CarMarket.xcodeproj` |
 
 ## Quick start
 

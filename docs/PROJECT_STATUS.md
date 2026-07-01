@@ -24,7 +24,8 @@
 - [x] Listing CRUD (draft → pending → live lifecycle)
 - [x] Public search with filters (PostgreSQL full-text v1)
 - [x] Next.js web scaffold with listing browse/detail pages
-- [x] Android & iOS project scaffolds
+- [x] **Android app** — native Compose: OTP login, home feed, search, listing detail, Retrofit API client
+- [x] **iOS app** — native SwiftUI: OTP login, home feed, search, listing detail, URLSession API client (`CarMarket.xcodeproj`)
 - [x] GitHub Actions CI (API tests, web lint/build)
 - [x] OpenAPI spec at `api/openapi.yaml`
 
