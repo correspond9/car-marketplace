@@ -7,7 +7,7 @@ Native **Kotlin + Jetpack Compose** app. Not a WebView wrapper.
 ```
 android/
 ├── app/src/main/java/in/carmarket/app/
-│   ├── ui/          # Screens (Login, Home, Search, Listing detail)
+│   ├── ui/          # Screens (Login, Home, Search, Sell, Favorites, Profile, …)
 │   ├── data/        # API, repositories, token storage
 │   └── ...
 └── gradle/          # Version catalog & wrapper config
@@ -38,18 +38,27 @@ android/
 ## Features implemented
 
 - Phone OTP login (secure token storage via DataStore)
+- Bottom navigation: **Home**, **Search**, **Sell**, **Favorites**, **Profile**
 - Home feed — latest live listings from API
 - Search — filter by keyword and city
-- Listing detail — price, specs, photos (when available)
-- Pull-to-refresh on home
+- Listing detail — price, specs, photos, favorite toggle, contact seller (inquiry)
+- **Sell** — create listing form with multi-photo picker and presign upload flow
+- **Favorites** — saved listings
+- **My listings** — list, publish, mark sold
+- **Profile** — user info, logout, delete account (`DELETE /auth/account`)
+- Pull-to-refresh on home, favorites, and my listings
 - Deep link intent filter for `https://carmarket.in/listing/*` (App Links — domain verification pending)
+
+## API coverage
+
+Retrofit client wired to: listings (search, me, create, publish, sold, presign/confirm images), favorites, inquiries, reviews, dealer-stores, users/me, auth/account delete.
 
 ## Architecture
 
 - **MVVM** — ViewModel + Compose UI
 - **Retrofit + Moshi** — REST client matching OpenAPI
 - **Coil** — image loading
-- **Navigation Compose** — typed routes
+- **Navigation Compose** — bottom tabs + detail routes
 
 ## Build from command line
 

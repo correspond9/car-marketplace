@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_db, require_roles
 from app.api.schemas import ListingOut, RejectListingRequest
+from app.application.audit import log_audit
 from app.application.listing_service import ListingError, ListingService
 from app.domain.enums import UserRole
 from app.infrastructure.database import UserModel
@@ -45,6 +46,13 @@ async def approve_listing(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"error": {"code": exc.code, "message": exc.message}},
         ) from exc
+    await log_audit(
+        db,
+        actor_id=moderator.id,
+        action="listing.approve",
+        entity_type="listing",
+        entity_id=listing.id,
+    )
     return ListingOut.model_validate(listing)
 
 
@@ -69,4 +77,12 @@ async def reject_listing(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={"error": {"code": exc.code, "message": exc.message}},
         ) from exc
+    await log_audit(
+        db,
+        actor_id=moderator.id,
+        action="listing.reject",
+        entity_type="listing",
+        entity_id=listing.id,
+        metadata={"reason": body.reason},
+    )
     return ListingOut.model_validate(listing)

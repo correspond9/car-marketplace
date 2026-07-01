@@ -38,6 +38,55 @@ paths:
       responses:
         "200":
           description: Tokens issued
+  /users/me:
+    get:
+      summary: Current user profile
+      tags: [users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profile
+  /dealer-stores:
+    post:
+      summary: Create dealer store (upgrades user to dealer)
+      tags: [dealer-stores]
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Created
+  /dealer-stores/{slug}:
+    get:
+      summary: Public dealer store page
+      tags: [dealer-stores]
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Store detail
+  /dealer-stores/me:
+    patch:
+      summary: Update own dealer store
+      tags: [dealer-stores]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Updated
+  /dealer-stores/me/listings:
+    get:
+      summary: Dealer store inventory
+      tags: [dealer-stores]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Listings
   /listings:
     get:
       summary: Search listings
@@ -66,6 +115,15 @@ paths:
       responses:
         "201":
           description: Created
+  /listings/me:
+    get:
+      summary: My listings
+      tags: [listings]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Owner listings
   /listings/{id}:
     get:
       summary: Get listing detail
@@ -80,6 +138,314 @@ paths:
       responses:
         "200":
           description: Listing detail
+    patch:
+      summary: Update listing
+      tags: [listings]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Updated
+    delete:
+      summary: Remove listing
+      tags: [listings]
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Removed
+  /listings/{id}/publish:
+    post:
+      summary: Submit listing for review
+      tags: [listings]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Published for review
+  /listings/{id}/sold:
+    post:
+      summary: Mark listing as sold
+      tags: [listings]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Marked sold
+  /listings/{id}/renew:
+    post:
+      summary: Renew listing expiry
+      tags: [listings]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Renewed
+  /listings/{id}/duplicate:
+    post:
+      summary: Duplicate listing as draft
+      tags: [listings]
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Duplicated
+  /listings/{id}/images/presign:
+    post:
+      summary: Get presigned upload URL
+      tags: [listings]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Presigned URL
+  /listings/{id}/images/confirm:
+    post:
+      summary: Confirm image upload
+      tags: [listings]
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Image recorded
+  /listings/{id}/images/{image_id}:
+    delete:
+      summary: Delete listing image
+      tags: [listings]
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Deleted
+  /listings/{listing_id}/inquiries:
+    post:
+      summary: Send inquiry on listing
+      tags: [inquiries]
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Inquiry created
+  /inquiries/inbox:
+    get:
+      summary: Seller inquiry inbox
+      tags: [inquiries]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Inbox
+  /inquiries/sent:
+    get:
+      summary: Buyer sent inquiries
+      tags: [inquiries]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Sent inquiries
+  /inquiries/{inquiry_id}/accept:
+    patch:
+      summary: Accept inquiry (reveals seller phone to buyer)
+      tags: [inquiries]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Accepted
+  /inquiries/{inquiry_id}/decline:
+    patch:
+      summary: Decline inquiry
+      tags: [inquiries]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Declined
+  /reviews:
+    get:
+      summary: List reviews for user or dealer store
+      tags: [reviews]
+      parameters:
+        - name: user_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: dealer_store_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Reviews
+    post:
+      summary: Create review (requires accepted inquiry)
+      tags: [reviews]
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Created
+  /reviews/{review_id}/reply:
+    post:
+      summary: Seller reply to review
+      tags: [reviews]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Replied
+  /reviews/{review_id}/report:
+    post:
+      summary: Report a review
+      tags: [reviews]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Reported
+  /favorites:
+    get:
+      summary: List favorite listings
+      tags: [favorites]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Favorites
+  /favorites/{listing_id}:
+    post:
+      summary: Add favorite
+      tags: [favorites]
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Added
+    delete:
+      summary: Remove favorite
+      tags: [favorites]
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Removed
+  /reports/listings/{listing_id}:
+    post:
+      summary: Report a listing
+      tags: [reports]
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Report filed
+  /saved-searches:
+    get:
+      summary: List saved searches
+      tags: [saved-searches]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Saved searches
+    post:
+      summary: Create saved search
+      tags: [saved-searches]
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Created
+  /saved-searches/{search_id}:
+    get:
+      summary: Get saved search
+      tags: [saved-searches]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Detail
+    patch:
+      summary: Update saved search
+      tags: [saved-searches]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Updated
+    delete:
+      summary: Delete saved search
+      tags: [saved-searches]
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Deleted
+  /moderation/listings:
+    get:
+      summary: Pending moderation queue
+      tags: [moderation]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Queue
+  /moderation/listings/{id}/approve:
+    post:
+      summary: Approve listing
+      tags: [moderation]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Approved
+  /moderation/listings/{id}/reject:
+    post:
+      summary: Reject listing
+      tags: [moderation]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Rejected
+  /admin/stats:
+    get:
+      summary: Platform statistics
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Stats
+  /admin/users/{user_id}/role:
+    patch:
+      summary: Update user role
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Updated
+  /admin/dealer-stores/{store_id}/verify:
+    post:
+      summary: Verify or reject dealer store
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Verified
+  /admin/audit-logs:
+    get:
+      summary: List audit logs
+      tags: [admin]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Audit logs
 components:
   securitySchemes:
     bearerAuth:

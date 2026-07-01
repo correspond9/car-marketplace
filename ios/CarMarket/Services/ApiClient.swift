@@ -59,6 +59,17 @@ final class ApiClient {
             throw ApiError.network(error)
         }
     }
+
+    func uploadPut(urlString: String, data: Data, contentType: String) async throws {
+        guard let url = URL(string: urlString) else { throw ApiError.invalidURL }
+        var request = URLRequest(url: url)
+        request.httpMethod = "PUT"
+        request.setValue(contentType, forHTTPHeaderField: "Content-Type")
+        let (_, response) = try await session.upload(for: request, from: data)
+        guard let http = response as? HTTPURLResponse, (200 ... 299).contains(http.statusCode) else {
+            throw ApiError.http((response as? HTTPURLResponse)?.statusCode ?? 0, "Image upload failed")
+        }
+    }
 }
 
 struct EmptyResponse: Decodable {
@@ -109,6 +120,19 @@ final class AuthService: ObservableObject {
         tokens.clear()
     }
 
+    func deleteAccount() async throws {
+        let _: EmptyResponse = try await client.request(
+            path: "auth/account",
+            method: "DELETE",
+            authenticated: true,
+        )
+        tokens.clear()
+    }
+
+    func getMe() async throws -> UserMe {
+        try await client.request(path: "users/me", authenticated: true)
+    }
+
     private func normalizePhone(_ phone: String) -> String {
         let digits = phone.filter(\.isNumber)
         if digits.count == 10 { return digits }
@@ -141,5 +165,130 @@ final class ListingService {
 
     func getListing(id: String) async throws -> Listing {
         try await client.request(path: "listings/\(id)")
+    }
+
+    func getMine(limit: Int = 20) async throws -> [Listing] {
+        let response: ListingListResponse = try await client.request(
+            path: "listings/me?limit=\(limit)",
+            authenticated: true,
+        )
+        return response.items
+    }
+
+    func create(_ input: ListingCreateInput) async throws -> Listing {
+        try await client.request(path: "listings", method: "POST", body: input, authenticated: true)
+    }
+
+    func publish(id: String) async throws -> Listing {
+        try await client.request(path: "listings/\(id)/publish", method: "POST", authenticated: true)
+    }
+
+    func markSold(id: String) async throws -> Listing {
+        try await client.request(path: "listings/\(id)/sold", method: "POST", authenticated: true)
+    }
+
+    func presignImage(listingId: String, filename: String, contentType: String) async throws -> ImagePresignResponse {
+        try await client.request(
+            path: "listings/\(listingId)/images/presign",
+            method: "POST",
+            body: ImagePresignRequest(filename: filename, contentType: contentType),
+            authenticated: true,
+        )
+    }
+
+    func confirmImage(listingId: String, input: ImageConfirmInput) async throws -> ListingImage {
+        try await client.request(
+            path: "listings/\(listingId)/images/confirm",
+            method: "POST",
+            body: input,
+            authenticated: true,
+        )
+    }
+
+    func uploadImage(listingId: String, data: Data, contentType: String, isCover: Bool, sortOrder: Int) async throws {
+        let filename = "photo_\(Int(Date().timeIntervalSince1970)).jpg"
+        let presign = try await presignImage(listingId: listingId, filename: filename, contentType: contentType)
+        try await client.uploadPut(urlString: presign.uploadUrl, data: data, contentType: contentType)
+        _ = try await confirmImage(
+            listingId: listingId,
+            input: ImageConfirmInput(storageKey: presign.storageKey, sortOrder: sortOrder, isCover: isCover),
+        )
+    }
+}
+
+@MainActor
+final class FavoriteService {
+    static let shared = FavoriteService()
+    private let client = ApiClient.shared
+
+    func list(limit: Int = 20) async throws -> [Listing] {
+        let response: ListingListResponse = try await client.request(
+            path: "favorites?limit=\(limit)",
+            authenticated: true,
+        )
+        return response.items
+    }
+
+    func add(listingId: String) async throws {
+        struct IdResponse: Decodable { let id: String }
+        _ = try await client.request(
+            path: "favorites/\(listingId)",
+            method: "POST",
+            authenticated: true,
+        ) as IdResponse
+    }
+
+    func remove(listingId: String) async throws {
+        let _: EmptyResponse = try await client.request(
+            path: "favorites/\(listingId)",
+            method: "DELETE",
+            authenticated: true,
+        )
+    }
+}
+
+@MainActor
+final class InquiryService {
+    static let shared = InquiryService()
+    private let client = ApiClient.shared
+
+    func create(listingId: String, message: String) async throws -> Inquiry {
+        try await client.request(
+            path: "listings/\(listingId)/inquiries",
+            method: "POST",
+            body: InquiryCreateInput(message: message),
+            authenticated: true,
+        )
+    }
+}
+
+@MainActor
+final class DealerService {
+    static let shared = DealerService()
+    private let client = ApiClient.shared
+
+    func getBySlug(_ slug: String) async throws -> DealerStore {
+        try await client.request(path: "dealer-stores/\(slug)")
+    }
+
+    func getMyListings(limit: Int = 20) async throws -> [Listing] {
+        let response: ListingListResponse = try await client.request(
+            path: "dealer-stores/me/listings?limit=\(limit)",
+            authenticated: true,
+        )
+        return response.items
+    }
+}
+
+@MainActor
+final class ReviewService {
+    static let shared = ReviewService()
+    private let client = ApiClient.shared
+
+    func list(targetType: String, targetId: String) async throws -> [Review] {
+        let response: ReviewListResponse = try await client.request(
+            path: "reviews?target_type=\(targetType)&target_id=\(targetId)",
+        )
+        return response.items
     }
 }

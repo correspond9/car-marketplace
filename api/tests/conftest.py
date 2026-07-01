@@ -7,6 +7,9 @@ os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("REDIS_URL", "redis://localhost:6379/0")
 os.environ.setdefault("APP_ENV", "development")
 os.environ.setdefault("SMS_PROVIDER", "mock")
+os.environ["S3_ACCESS_KEY"] = ""
+os.environ["S3_SECRET_KEY"] = ""
+os.environ["S3_ENDPOINT"] = ""
 
 import fakeredis.aioredis
 import pytest
@@ -15,8 +18,11 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from app.infrastructure import redis_client
-from app.infrastructure.database import Base, get_db_session
+from app.infrastructure.database import Base, UserModel, get_db_session
 from app.main import app
+from app.domain.enums import UserRole
+from app.core.security import normalize_phone
+from sqlalchemy import select
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -78,4 +84,22 @@ async def auth_headers(client: AsyncClient) -> dict[str, str]:
         "/api/v1/auth/otp/verify", json={"phone": phone, "otp": "123456"}
     )
     token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest_asyncio.fixture
+async def moderator_headers(
+    client: AsyncClient, db_session: AsyncSession
+) -> dict[str, str]:
+    phone = "9988776655"
+    await client.post("/api/v1/auth/otp/request", json={"phone": phone})
+    response = await client.post(
+        "/api/v1/auth/otp/verify", json={"phone": phone, "otp": "123456"}
+    )
+    token = response.json()["access_token"]
+    normalized = normalize_phone(phone)
+    result = await db_session.execute(select(UserModel).where(UserModel.phone == normalized))
+    user = result.scalar_one()
+    user.role = UserRole.MODERATOR
+    await db_session.flush()
     return {"Authorization": f"Bearer {token}"}

@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user, get_db
 from app.api.schemas import UserMe, UserPublic, UserUpdate
+from app.application.notification_service import RecentlyViewedService
 from app.infrastructure.database import UserModel
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -27,6 +28,24 @@ async def update_me(
         setattr(user, key, value)
     await db.flush()
     return UserMe.model_validate(user)
+
+
+@router.get("/me/export")
+async def export_my_data(user: Annotated[UserModel, Depends(get_current_user)]) -> dict:
+    """DPDP Act — user data export."""
+    return {
+        "user": UserMe.model_validate(user).model_dump(mode="json"),
+        "exported_at": __import__("datetime").datetime.now(__import__("datetime").UTC).isoformat(),
+    }
+
+
+@router.get("/me/recently-viewed")
+async def my_recently_viewed(
+    user: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    rows = await RecentlyViewedService(db).list_for_user(user.id)
+    return [{"listing_id": str(r.listing_id), "viewed_at": r.viewed_at} for r in rows]
 
 
 @router.get("/{user_id}", response_model=UserPublic)

@@ -4,6 +4,7 @@ import in.carmarket.app.data.local.TokenStore
 import in.carmarket.app.data.remote.ApiService
 import in.carmarket.app.data.remote.OtpRequestBody
 import in.carmarket.app.data.remote.OtpVerifyBody
+import in.carmarket.app.data.remote.UserMeDto
 import retrofit2.HttpException
 
 class AuthRepository(
@@ -23,6 +24,15 @@ class AuthRepository(
         tokenStore.clear()
     }
 
+    suspend fun deleteAccount(): Result<Unit> = apiCall {
+        api.deleteAccount()
+        tokenStore.clear()
+    }
+
+    suspend fun getMe(): Result<UserMeDto> = apiCall {
+        api.getMe()
+    }
+
     fun isLoggedInFlow() = tokenStore.isLoggedIn
 
     private fun normalizePhone(phone: String): String {
@@ -32,6 +42,26 @@ class AuthRepository(
             digits.length == 12 && digits.startsWith("91") -> digits.substring(2)
             else -> digits
         }
+    }
+}
+
+class FavoriteRepository(private val api: ApiService) {
+    suspend fun list(page: Int = 1, limit: Int = 20) = apiCall {
+        api.getFavorites(page = page, limit = limit).items
+    }
+
+    suspend fun add(listingId: String) = apiCall {
+        api.addFavorite(listingId)
+    }
+
+    suspend fun remove(listingId: String) = apiCall {
+        api.removeFavorite(listingId)
+    }
+}
+
+class InquiryRepository(private val api: ApiService) {
+    suspend fun create(listingId: String, message: String) = apiCall {
+        api.createInquiry(listingId, in.carmarket.app.data.remote.InquiryCreateBody(message))
     }
 }
 

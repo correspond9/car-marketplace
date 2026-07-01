@@ -8,7 +8,7 @@ Native **Swift + SwiftUI** app. Not a WebView wrapper.
 ios/
 ├── CarMarket.xcodeproj/     ← Open this in Xcode
 ├── CarMarket/
-│   ├── Views/               # Login, Home, Search, Listing detail
+│   ├── Views/               # Login, Home, Search, Sell, Favorites, Profile, …
 │   ├── ViewModels/
 │   ├── Services/            # API client
 │   ├── Models/
@@ -41,10 +41,19 @@ For a **physical iPhone** on the same Wi‑Fi, change `ApiConfig.swift` to your 
 ## Features implemented
 
 - Phone OTP login (tokens in UserDefaults — Keychain upgrade planned)
+- **TabView**: Home, Search, Sell, Favorites, Profile
 - Home feed with pull-to-refresh
 - Search by keyword and city
-- Listing detail screen
+- Listing detail — favorite toggle, contact seller (inquiry sheet)
+- **Sell** — create listing form with PhotosPicker and presign upload flow
+- **Favorites** — saved listings
+- **My listings** (from Profile) — publish, mark sold
+- **Profile** — user info, logout, delete account
 - Structured error handling from API
+
+## API coverage
+
+URLSession client wired to: listings (search, me, create, publish, sold, presign/confirm images), favorites, inquiries, reviews, dealer-stores, users/me, auth/account delete.
 
 ## Architecture
 
@@ -64,4 +73,4 @@ xcodebuild test -project CarMarket.xcodeproj -scheme CarMarket -destination 'pla
 
 - Replace UserDefaults token storage with **Keychain**
 - Add Sign in with Apple if social login is added
-- Privacy manifest & photo/camera usage strings when listing upload is added
+- Privacy manifest for photo library access (usage string added in Info.plist)

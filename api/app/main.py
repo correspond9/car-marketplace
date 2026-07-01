@@ -9,11 +9,17 @@ from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.infrastructure.redis_client import close_redis
+from app.infrastructure.storage import get_storage_service
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     setup_logging()
+    if settings.s3_access_key and settings.s3_secret_key:
+        try:
+            get_storage_service().ensure_bucket()
+        except Exception:
+            pass
     yield
     await close_redis()
 

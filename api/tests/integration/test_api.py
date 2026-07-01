@@ -43,6 +43,21 @@ async def test_create_and_search_listing(client: AsyncClient, auth_headers: dict
     assert create.status_code == 201
     listing_id = create.json()["id"]
 
+    for i in range(5):
+        presign = await client.post(
+            f"/api/v1/listings/{listing_id}/images/presign",
+            json={"filename": f"car{i}.jpg", "content_type": "image/jpeg"},
+            headers=auth_headers,
+        )
+        assert presign.status_code == 200
+        storage_key = presign.json()["storage_key"]
+        confirm = await client.post(
+            f"/api/v1/listings/{listing_id}/images/confirm",
+            json={"storage_key": storage_key, "sort_order": i},
+            headers=auth_headers,
+        )
+        assert confirm.status_code == 201
+
     publish = await client.post(f"/api/v1/listings/{listing_id}/publish", headers=auth_headers)
     assert publish.status_code == 200
     assert publish.json()["status"] == "pending_review"

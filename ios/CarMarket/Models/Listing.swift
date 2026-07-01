@@ -10,6 +10,20 @@ struct TokenResponse: Codable {
     }
 }
 
+struct UserMe: Codable {
+    let id: String
+    let phone: String
+    let email: String?
+    let displayName: String?
+    let city: String?
+    let role: String
+
+    enum CodingKeys: String, CodingKey {
+        case id, phone, email, city, role
+        case displayName = "display_name"
+    }
+}
+
 struct ListingImage: Codable, Identifiable {
     let id: String
     let url: String
@@ -56,6 +70,103 @@ struct ListingListResponse: Codable {
     let page: Int
     let limit: Int
     let pages: Int
+}
+
+struct ListingCreateInput: Encodable {
+    let make: String
+    let model: String
+    let variant: String?
+    let manufacturingYear: Int
+    let bodyType: String
+    let fuelType: String
+    let transmission: String
+    let odometerKm: Int
+    let askingPrice: Int
+    let city: String
+    let locality: String?
+    let negotiable: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case make, model, variant, negotiable, city, locality, transmission
+        case manufacturingYear = "manufacturing_year"
+        case bodyType = "body_type"
+        case fuelType = "fuel_type"
+        case odometerKm = "odometer_km"
+        case askingPrice = "asking_price"
+    }
+}
+
+struct ImagePresignRequest: Encodable {
+    let filename: String
+    let contentType: String
+
+    enum CodingKeys: String, CodingKey {
+        case filename
+        case contentType = "content_type"
+    }
+}
+
+struct ImagePresignResponse: Decodable {
+    let uploadUrl: String
+    let storageKey: String
+    let contentType: String
+
+    enum CodingKeys: String, CodingKey {
+        case uploadUrl = "upload_url"
+        case storageKey = "storage_key"
+        case contentType = "content_type"
+    }
+}
+
+struct ImageConfirmInput: Encodable {
+    let storageKey: String
+    let sortOrder: Int
+    let isCover: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case storageKey = "storage_key"
+        case sortOrder = "sort_order"
+        case isCover = "is_cover"
+    }
+}
+
+struct InquiryCreateInput: Encodable {
+    let message: String
+}
+
+struct Inquiry: Codable, Identifiable {
+    let id: String
+    let listingId: String
+    let message: String
+    let status: String
+    let sellerPhone: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, message, status
+        case listingId = "listing_id"
+        case sellerPhone = "seller_phone"
+    }
+}
+
+struct Review: Codable, Identifiable {
+    let id: String
+    let rating: Int
+    let text: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, rating, text
+    }
+}
+
+struct ReviewListResponse: Codable {
+    let items: [Review]
+}
+
+struct DealerStore: Codable, Identifiable {
+    let id: String
+    let name: String
+    let slug: String
+    let city: String?
 }
 
 struct ApiErrorResponse: Codable {

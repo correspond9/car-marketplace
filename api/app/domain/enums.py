@@ -85,6 +85,39 @@ class ReportReason(StrEnum):
     ALREADY_SOLD = "already_sold"
 
 
+class ReportEntityType(StrEnum):
+    LISTING = "listing"
+    REVIEW = "review"
+
+
+class ReportStatus(StrEnum):
+    PENDING = "pending"
+    REVIEWED = "reviewed"
+    DISMISSED = "dismissed"
+
+
+class NotificationType(StrEnum):
+    INQUIRY = "inquiry"
+    INQUIRY_ACCEPTED = "inquiry_accepted"
+    LISTING_APPROVED = "listing_approved"
+    LISTING_REJECTED = "listing_rejected"
+    PRICE_DROP = "price_drop"
+    SAVED_SEARCH = "saved_search"
+
+
+class DealerDocumentType(StrEnum):
+    GST = "gst"
+    TRADE_LICENSE = "trade_license"
+    PAN = "pan"
+    OTHER = "other"
+
+
+class DealerDocumentStatus(StrEnum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+
 class SortOption(StrEnum):
     RELEVANCE = "relevance"
     PRICE_ASC = "price_asc"

@@ -1,65 +1,54 @@
 # Project Status
 
-**Last updated:** 2026-07-02T00:00:00Z
+**Last updated:** 2026-07-02
 
 ## Overview
 
 | Metric | Value |
 |--------|-------|
-| **Completed** | ~15% |
-| **Current milestone** | Phase 0 — Foundation |
-| **Current sprint** | Sprint 1 — Repo scaffold + Auth + Listing core |
-| **Target** | Production MVP (Phase 1) |
+| **Completed** | ~85% of Phase 0 + Phase 1 MVP |
+| **Current milestone** | Phase 1 MVP — feature complete (dev) |
+| **Target** | Production deployment + store release |
 
-## Completed modules
+## Completed (matches product brief)
 
-- [x] Monorepo structure (`api`, `web`, `android`, `ios`)
-- [x] Documentation suite (`docs/`)
-- [x] Architectural decisions recorded (with owner-pending items flagged)
-- [x] Docker Compose (PostgreSQL 16, Redis 7)
-- [x] FastAPI backend scaffold with clean architecture layers
-- [x] Database schema v1 + Alembic migrations
-- [x] Auth: OTP request/verify, JWT access + refresh tokens, role-based access
-- [x] User & dealer store domain models
-- [x] Listing CRUD (draft → pending → live lifecycle)
-- [x] Public search with filters (PostgreSQL full-text v1)
-- [x] Next.js web scaffold with listing browse/detail pages
-- [x] **Android app** — native Compose: OTP login, home feed, search, listing detail, Retrofit API client
-- [x] **iOS app** — native SwiftUI: OTP login, home feed, search, listing detail, URLSession API client (`CarMarket.xcodeproj`)
-- [x] GitHub Actions CI (API tests, web lint/build)
-- [x] OpenAPI spec at `api/openapi.yaml`
+### Backend API
+- Auth: OTP, JWT, refresh, account delete, data export (DPDP)
+- Listings: full CRUD, publish, sold, renew, duplicate, 5-photo rule, image presign/confirm
+- Search with filters; dealer stores; inquiries (phone hidden until accepted)
+- Reviews (post-inquiry); favorites; saved searches; reports
+- Moderation queue; admin stats, role updates, dealer verification, audit logs
+- Notifications (in-app); recently viewed tracking
 
-## In progress
+### Website
+- Login, sell car (with photos), my listings, favorites, compare (4 cars)
+- Dealer store pages, admin moderation, legal pages (Terms/Privacy/Disclaimer)
+- Help centre FAQ, SEO (sitemap, robots, city landing pages)
+- Contact seller inquiry flow
 
-- [ ] Image upload pipeline (presigned URLs + S3/R2)
-- [ ] Messaging / inquiries
-- [ ] Reviews system
-- [ ] Moderation admin UI
-- [ ] Push notifications (FCM)
+### Mobile (native Kotlin + SwiftUI)
+- OTP login, browse, search, detail, sell with photos, favorites, my listings
+- Contact seller, profile, logout, delete account
 
-## Blocked — owner decisions required
+### Infrastructure
+- Docker Compose, CI, migrations, OpenAPI spec, documentation
 
-| Item | Default assumed | Status |
-|------|-----------------|--------|
-| Listing moderation | Manual approval for new listings | **Pending owner confirm** |
-| Phone/email visibility | Hidden until seller accepts inquiry | **Pending owner confirm** |
-| Monetization v1 | Free connect-only | **Pending owner confirm** |
-| Brand name & domain | Placeholder: CarMarket / carmarket.in | **Pending owner confirm** |
-| SMS OTP provider credentials | Dev mock OTP (`123456`) | **Needs MSG91/Twilio keys** |
-| Object storage credentials | Local MinIO in dev | **Needs R2/S3 prod keys** |
+## Still pending (brief Phase 2 / 3 or external deps)
 
-## Next priorities
+| Item | Why not done |
+|------|----------------|
+| **Production SMS (MSG91)** | Needs your API keys |
+| **Production storage CDN (R2/S3)** | Needs cloud credentials |
+| **Push notifications (FCM/APNs)** | Needs Firebase + Apple certs |
+| **Google Maps SDK in apps** | Needs Maps API key |
+| **Hindi UI** | Phase 2 in brief |
+| **Meilisearch** | Phase 2 in brief |
+| **Razorpay / monetization** | Phase 2 + owner decision |
+| **Escrow / payments** | Phase 3 + legal review |
+| **Figma / PRD documents** | Design deliverables, not code |
+| **Play Store / App Store submission** | Needs developer accounts + signing |
+| **99.5% uptime / prod deployment** | Needs hosting choice + deploy runbook execution |
 
-1. Image upload pipeline with presigned URLs
-2. Dealer store public pages
-3. Inquiry/messaging MVP
-4. Moderation queue API + admin web views
-5. Native mobile: auth + browse + listing detail
+## Owner decisions still required
 
-## Estimated remaining work
-
-| Phase | Duration estimate |
-|-------|-------------------|
-| Phase 0 completion | 2–3 weeks |
-| Phase 1 MVP | 6–8 weeks |
-| Phase 2 Growth | Ongoing |
+See `docs/DECISIONS.md` — moderation default, phone visibility, monetization, brand/domain.

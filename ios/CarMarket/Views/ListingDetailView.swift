@@ -40,11 +40,16 @@ struct ListingDetailView: View {
                             if let reg = listing.registrationNumberMasked {
                                 detail("Registration", reg)
                             }
-                            Button("Contact seller") {}
-                                .buttonStyle(.borderedProminent)
-                                .tint(.green)
-                                .frame(maxWidth: .infinity)
-                                .padding(.top, 12)
+                            if let msg = viewModel.statusMessage {
+                                Text(msg).foregroundStyle(.green).padding(.top, 4)
+                            }
+                            Button("Contact seller") {
+                                viewModel.showInquirySheet = true
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.green)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 12)
                         }
                         .padding(16)
                     }
@@ -52,6 +57,41 @@ struct ListingDetailView: View {
             }
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    Task { await viewModel.toggleFavorite() }
+                } label: {
+                    Image(systemName: viewModel.isFavorite ? "heart.fill" : "heart")
+                        .foregroundStyle(viewModel.isFavorite ? .green : .primary)
+                }
+                .disabled(viewModel.favoriteBusy)
+            }
+        }
+        .sheet(isPresented: $viewModel.showInquirySheet) {
+            NavigationStack {
+                Form {
+                    Section("Message to seller") {
+                        TextField("Hi, I'm interested in this car…", text: $viewModel.inquiryMessage, axis: .vertical)
+                            .lineLimit(3 ... 6)
+                    }
+                    Section {
+                        Button(viewModel.inquirySending ? "Sending…" : "Send inquiry") {
+                            Task { await viewModel.sendInquiry() }
+                        }
+                        .disabled(viewModel.inquirySending)
+                    }
+                }
+                .navigationTitle("Contact seller")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") { viewModel.showInquirySheet = false }
+                    }
+                }
+            }
+            .presentationDetents([.medium])
+        }
         .task { await viewModel.load(id: listingId) }
     }
 

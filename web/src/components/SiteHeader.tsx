@@ -1,54 +1,63 @@
+"use client";
+
 import Link from "next/link";
+import { useAuth } from "@/components/AuthProvider";
 
 export function SiteHeader() {
+  const { user, loading, logout } = useAuth();
+  const isModerator = user?.role === "moderator" || user?.role === "admin";
+
   return (
     <header className="border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4">
         <Link href="/" className="text-xl font-bold text-emerald-700">
           CarMarket
         </Link>
-        <nav className="flex gap-4 text-sm font-medium text-slate-700">
+        <nav className="flex flex-wrap items-center gap-3 text-sm font-medium text-slate-700">
           <Link href="/search" className="hover:text-emerald-700">
             Browse cars
           </Link>
-          <Link href="/search?seller_type=dealer" className="hover:text-emerald-700">
-            Dealers
+          <Link href="/compare" className="hover:text-emerald-700">
+            Compare
           </Link>
+          <Link href="/sell" className="hover:text-emerald-700">
+            Sell car
+          </Link>
+          {user && (
+            <>
+              <Link href="/favorites" className="hover:text-emerald-700">
+                Favorites
+              </Link>
+              <Link href="/my-listings" className="hover:text-emerald-700">
+                My listings
+              </Link>
+            </>
+          )}
+          {isModerator && (
+            <Link href="/admin" className="hover:text-emerald-700">
+              Admin
+            </Link>
+          )}
+          {!loading && (
+            user ? (
+              <button
+                type="button"
+                onClick={() => logout()}
+                className="rounded-lg border border-slate-300 px-3 py-1.5 hover:border-emerald-600 hover:text-emerald-700"
+              >
+                Log out
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="rounded-lg bg-emerald-700 px-3 py-1.5 text-white hover:bg-emerald-800"
+              >
+                Log in
+              </Link>
+            )
+          )}
         </nav>
       </div>
     </header>
-  );
-}
-
-export function ListingCard({ listing }: { listing: import("@/lib/api").Listing }) {
-  const cover = listing.images.find((i) => i.is_cover) ?? listing.images[0];
-  return (
-    <Link
-      href={`/listing/${listing.id}`}
-      className="block overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md"
-    >
-      <div className="aspect-[16/10] bg-slate-100 flex items-center justify-center text-slate-400 text-sm">
-        {cover ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={cover.url} alt={`${listing.make} ${listing.model}`} className="h-full w-full object-cover" />
-        ) : (
-          "No photo"
-        )}
-      </div>
-      <div className="p-4">
-        <h3 className="font-semibold text-slate-900">
-          {listing.make} {listing.model}
-          {listing.variant ? ` ${listing.variant}` : ""}
-        </h3>
-        <p className="mt-1 text-sm text-slate-600">
-          {listing.manufacturing_year} · {listing.odometer_km.toLocaleString("en-IN")} km · {listing.city}
-        </p>
-        <p className="mt-2 text-lg font-bold text-emerald-700">
-          {new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(
-            listing.asking_price,
-          )}
-        </p>
-      </div>
-    </Link>
   );
 }

@@ -10,14 +10,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -46,6 +51,35 @@ fun ListingDetailScreen(
     val listing = state.listing
     val kmFormatter = NumberFormat.getNumberInstance(Locale("en", "IN"))
 
+    if (state.showInquiryDialog) {
+        AlertDialog(
+            onDismissRequest = viewModel::dismissInquiryDialog,
+            title = { Text("Contact seller") },
+            text = {
+                OutlinedTextField(
+                    value = state.inquiryMessage,
+                    onValueChange = viewModel::onInquiryMessageChange,
+                    label = { Text("Your message") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3,
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = viewModel::sendInquiry,
+                    enabled = !state.inquirySending,
+                ) {
+                    Text(if (state.inquirySending) "Sending…" else "Send")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::dismissInquiryDialog) {
+                    Text("Cancel")
+                }
+            },
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -53,6 +87,22 @@ fun ListingDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = viewModel::toggleFavorite,
+                        enabled = !state.favoriteBusy && listing != null,
+                    ) {
+                        Icon(
+                            if (state.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Favorite",
+                            tint = if (state.isFavorite) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            },
+                        )
                     }
                 },
             )
@@ -124,8 +174,15 @@ fun ListingDetailScreen(
                         listing.registrationNumberMasked?.let {
                             DetailRow("Registration", it)
                         }
+                        state.message?.let {
+                            Text(
+                                it,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(top = 12.dp),
+                            )
+                        }
                         Button(
-                            onClick = { },
+                            onClick = viewModel::showInquiryDialog,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 24.dp),

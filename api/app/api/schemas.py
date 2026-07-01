@@ -6,11 +6,16 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.domain.enums import (
     BodyType,
     FuelType,
+    InquiryStatus,
     ListingStatus,
     LoanStatus,
     RCStatus,
+    ReportReason,
+    ReviewStatus,
+    ReviewTargetType,
     Transmission,
     UserRole,
+    VerificationStatus,
 )
 
 
@@ -186,6 +191,7 @@ class ListingOut(BaseModel):
     status: ListingStatus
     published_at: datetime | None
     expires_at: datetime | None
+    sold_at: datetime | None = None
     created_at: datetime
     images: list[ListingImageOut] = Field(default_factory=list)
 
@@ -205,3 +211,218 @@ class RejectListingRequest(BaseModel):
 class HealthResponse(BaseModel):
     status: str
     version: str = "0.1.0"
+
+
+class ImagePresignRequest(BaseModel):
+    filename: str = Field(..., max_length=255)
+    content_type: str = Field(..., max_length=100, examples=["image/jpeg"])
+
+
+class ImagePresignResponse(BaseModel):
+    upload_url: str
+    storage_key: str
+    content_type: str
+    expires_in: int
+
+
+class ImageConfirmRequest(BaseModel):
+    storage_key: str = Field(..., max_length=512)
+    sort_order: int = Field(0, ge=0)
+    is_cover: bool = False
+
+
+class DealerStoreCreate(BaseModel):
+    name: str = Field(..., max_length=200)
+    slug: str | None = Field(None, max_length=200)
+    description: str | None = None
+    logo_url: str | None = Field(None, max_length=512)
+    banner_url: str | None = Field(None, max_length=512)
+    address: str | None = Field(None, max_length=500)
+    city: str | None = Field(None, max_length=100)
+    state: str | None = Field(None, max_length=100)
+    pincode: str | None = Field(None, max_length=10)
+    phone: str | None = Field(None, max_length=20)
+    whatsapp: str | None = Field(None, max_length=20)
+    business_hours: dict | None = None
+
+
+class DealerStoreUpdate(BaseModel):
+    name: str | None = Field(None, max_length=200)
+    slug: str | None = Field(None, max_length=200)
+    description: str | None = None
+    logo_url: str | None = None
+    banner_url: str | None = None
+    address: str | None = None
+    city: str | None = None
+    state: str | None = None
+    pincode: str | None = None
+    phone: str | None = None
+    whatsapp: str | None = None
+    business_hours: dict | None = None
+
+
+class DealerStoreOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    owner_id: UUID
+    name: str
+    slug: str
+    description: str | None
+    logo_url: str | None
+    banner_url: str | None
+    address: str | None
+    city: str | None
+    state: str | None
+    pincode: str | None
+    phone: str | None
+    whatsapp: str | None
+    business_hours: dict | None
+    rating_avg: float
+    rating_count: int
+    verification_status: VerificationStatus
+    created_at: datetime
+
+
+class InquiryCreate(BaseModel):
+    message: str = Field(..., min_length=5, max_length=2000)
+
+
+class InquiryOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    listing_id: UUID
+    buyer_id: UUID
+    seller_id: UUID
+    message: str
+    status: InquiryStatus
+    created_at: datetime
+    seller_phone: str | None = None
+    buyer_phone: str | None = None
+
+
+class InquiryListResponse(BaseModel):
+    items: list[InquiryOut]
+    total: int
+    page: int
+    limit: int
+
+
+class ReviewCreate(BaseModel):
+    target_type: ReviewTargetType
+    target_id: UUID
+    rating: int = Field(..., ge=1, le=5)
+    text: str | None = Field(None, max_length=2000)
+
+
+class ReviewReply(BaseModel):
+    reply: str = Field(..., min_length=1, max_length=2000)
+
+
+class ReviewOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    reviewer_id: UUID
+    target_type: ReviewTargetType
+    target_id: UUID
+    rating: int
+    text: str | None
+    seller_reply: str | None
+    status: ReviewStatus
+    created_at: datetime
+
+
+class ReviewListResponse(BaseModel):
+    items: list[ReviewOut]
+    total: int
+    page: int
+    limit: int
+
+
+class ReportCreate(BaseModel):
+    reason: ReportReason
+    details: str | None = Field(None, max_length=2000)
+
+
+class ReportOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    reporter_id: UUID
+    entity_type: str
+    entity_id: UUID
+    reason: ReportReason
+    details: str | None
+    status: str
+    created_at: datetime
+
+
+class SavedSearchCreate(BaseModel):
+    name: str = Field(..., max_length=200)
+    filters: dict = Field(default_factory=dict)
+    notify: bool = False
+
+
+class SavedSearchUpdate(BaseModel):
+    name: str | None = Field(None, max_length=200)
+    filters: dict | None = None
+    notify: bool | None = None
+
+
+class SavedSearchOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    user_id: UUID
+    name: str
+    filters: dict
+    notify: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+class SavedSearchListResponse(BaseModel):
+    items: list[SavedSearchOut]
+    total: int
+    page: int
+    limit: int
+
+
+class AdminStatsOut(BaseModel):
+    users: int
+    listings: int
+    live_listings: int
+    pending_listings: int
+    dealer_stores: int
+    verified_dealers: int
+    inquiries: int
+    reports: int
+
+
+class AdminRoleUpdate(BaseModel):
+    role: UserRole
+
+
+class DealerVerifyRequest(BaseModel):
+    verified: bool = True
+
+
+class AuditLogOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    actor_id: UUID
+    action: str
+    entity_type: str
+    entity_id: UUID
+    metadata_json: dict | None
+    created_at: datetime
+
+
+class AuditLogListResponse(BaseModel):
+    items: list[AuditLogOut]
+    total: int
+    page: int
+    limit: int

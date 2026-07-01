@@ -4,6 +4,8 @@ import android.app.Application
 import in.carmarket.app.data.local.TokenStore
 import in.carmarket.app.data.remote.NetworkModule
 import in.carmarket.app.data.repository.AuthRepository
+import in.carmarket.app.data.repository.FavoriteRepository
+import in.carmarket.app.data.repository.InquiryRepository
 import in.carmarket.app.data.repository.ListingRepository
 
 class CarMarketApp : Application() {
@@ -13,6 +15,10 @@ class CarMarketApp : Application() {
         private set
     lateinit var listingRepository: ListingRepository
         private set
+    lateinit var favoriteRepository: FavoriteRepository
+        private set
+    lateinit var inquiryRepository: InquiryRepository
+        private set
 
     override fun onCreate() {
         super.onCreate()
@@ -21,6 +27,8 @@ class CarMarketApp : Application() {
         val api = NetworkModule.createApi(tokenStore)
         authRepository = AuthRepository(api, tokenStore)
         listingRepository = ListingRepository(api)
+        favoriteRepository = FavoriteRepository(api)
+        inquiryRepository = InquiryRepository(api)
     }
 
     companion object {

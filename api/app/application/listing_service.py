@@ -40,7 +40,7 @@ def slugify(value: str) -> str:
 
 
 class ListingService:
-    MIN_PHOTOS_TO_PUBLISH = 0  # Raised to 5 when image upload pipeline is complete
+    MIN_PHOTOS_TO_PUBLISH = 5
 
     def __init__(self, db: AsyncSession):
         self.db = db
@@ -236,6 +236,91 @@ class ListingService:
             .limit(limit)
         )
         return list(result.scalars().all())
+
+    async def list_my(
+        self, user: UserModel, *, page: int = 1, limit: int = 20
+    ) -> tuple[list[ListingModel], int]:
+        offset = (page - 1) * limit
+        base = select(ListingModel).where(
+            ListingModel.seller_id == user.id,
+            ListingModel.status != ListingStatus.REMOVED,
+        )
+        count_query = select(func.count()).select_from(ListingModel).where(
+            ListingModel.seller_id == user.id,
+            ListingModel.status != ListingStatus.REMOVED,
+        )
+        query = (
+            base.options(selectinload(ListingModel.images))
+            .order_by(ListingModel.updated_at.desc())
+            .offset(offset)
+            .limit(limit)
+        )
+        total = (await self.db.execute(count_query)).scalar_one()
+        result = await self.db.execute(query)
+        return list(result.scalars().all()), total
+
+    async def mark_sold(self, listing: ListingModel, user: UserModel) -> ListingModel:
+        if listing.seller_id != user.id:
+            raise ListingError("Not authorized.", "FORBIDDEN")
+        if listing.status not in (ListingStatus.LIVE, ListingStatus.EXPIRED):
+            raise ListingError("Only live or expired listings can be marked sold.", "INVALID_STATUS")
+        listing.status = ListingStatus.SOLD
+        listing.sold_at = datetime.now(UTC)
+        await self.db.flush()
+        return listing
+
+    async def renew(self, listing: ListingModel, user: UserModel) -> ListingModel:
+        if listing.seller_id != user.id:
+            raise ListingError("Not authorized.", "FORBIDDEN")
+        if listing.status not in (ListingStatus.LIVE, ListingStatus.EXPIRED):
+            raise ListingError("Listing cannot be renewed from current status.", "INVALID_STATUS")
+        listing.expires_at = datetime.now(UTC) + timedelta(days=settings.listing_expiry_days)
+        if listing.status == ListingStatus.EXPIRED:
+            listing.status = ListingStatus.LIVE
+        await self.db.flush()
+        return listing
+
+    async def duplicate(self, listing: ListingModel, user: UserModel) -> ListingModel:
+        if listing.seller_id != user.id:
+            raise ListingError("Not authorized.", "FORBIDDEN")
+        copy_fields = (
+            "make",
+            "model",
+            "variant",
+            "manufacturing_year",
+            "registration_year",
+            "body_type",
+            "fuel_type",
+            "transmission",
+            "engine_capacity_cc",
+            "odometer_km",
+            "num_owners",
+            "accident_history",
+            "flood_history",
+            "service_history_available",
+            "registration_state",
+            "registration_city",
+            "registration_number_masked",
+            "rc_status",
+            "insurance_expiry",
+            "puc_expiry",
+            "loan_status",
+            "asking_price",
+            "negotiable",
+            "exchange_accepted",
+            "reason_for_selling",
+            "city",
+            "locality",
+            "pincode",
+            "test_drive_available",
+            "dealer_store_id",
+        )
+        data = {field: getattr(listing, field) for field in copy_fields}
+        new_listing = ListingModel(seller_id=user.id, status=ListingStatus.DRAFT, **data)
+        self._update_search_vector(new_listing)
+        self.db.add(new_listing)
+        await self.db.flush()
+        return new_listing
 
     def _update_search_vector(self, listing: ListingModel) -> None:
         # Search uses ILIKE in v1; search_vector reserved for Phase 2 Meilisearch/FTS migration.

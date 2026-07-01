@@ -24,11 +24,17 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from app.core.config import settings
 from app.domain.enums import (
     BodyType,
+    DealerDocumentStatus,
+    DealerDocumentType,
     FuelType,
     InquiryStatus,
     ListingStatus,
     LoanStatus,
+    NotificationType,
     RCStatus,
+    ReportEntityType,
+    ReportReason,
+    ReportStatus,
     ReviewStatus,
     ReviewTargetType,
     Transmission,
@@ -109,6 +115,7 @@ class DealerStoreModel(Base):
 
     owner: Mapped[UserModel] = relationship(back_populates="dealer_store")
     listings: Mapped[list["ListingModel"]] = relationship(back_populates="dealer_store")
+    documents: Mapped[list["DealerDocumentModel"]] = relationship(back_populates="dealer_store")
 
 
 class ListingModel(Base):
@@ -163,6 +170,8 @@ class ListingModel(Base):
     search_vector: Mapped[str | None] = mapped_column(Text, nullable=True)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    sold_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    view_count: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -240,6 +249,8 @@ class InquiryModel(Base):
         DateTime(timezone=True), server_default=func.now()
     )
 
+    listing: Mapped["ListingModel"] = relationship()
+
 
 class FavoriteModel(Base):
     __tablename__ = "favorites"
@@ -269,6 +280,106 @@ class AuditLogModel(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+
+
+class ReportModel(Base):
+    __tablename__ = "reports"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    reporter_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
+    )
+    entity_type: Mapped[ReportEntityType] = mapped_column(
+        pg_enum(ReportEntityType, "report_entity_type"), nullable=False
+    )
+    entity_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
+    reason: Mapped[ReportReason] = mapped_column(
+        pg_enum(ReportReason, "report_reason"), nullable=False
+    )
+    details: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[ReportStatus] = mapped_column(
+        pg_enum(ReportStatus, "report_status"), default=ReportStatus.PENDING
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
+class SavedSearchModel(Base):
+    __tablename__ = "saved_searches"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )
+    name: Mapped[str] = mapped_column(String(200), nullable=False)
+    filters: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    notify: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class NotificationModel(Base):
+    __tablename__ = "notifications"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True
+    )
+    type: Mapped[NotificationType] = mapped_column(
+        pg_enum(NotificationType, "notification_type"), nullable=False
+    )
+    title: Mapped[str] = mapped_column(String(200), nullable=False)
+    body: Mapped[str | None] = mapped_column(Text, nullable=True)
+    data: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    read_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
+class RecentlyViewedModel(Base):
+    __tablename__ = "recently_viewed"
+    __table_args__ = (
+        Index("ix_recently_viewed_user_listing", "user_id", "listing_id", unique=True),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
+    )
+    listing_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("listings.id", ondelete="CASCADE"), nullable=False
+    )
+    viewed_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
+class DealerDocumentModel(Base):
+    __tablename__ = "dealer_documents"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    dealer_store_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("dealer_stores.id", ondelete="CASCADE"), nullable=False
+    )
+    document_type: Mapped[DealerDocumentType] = mapped_column(
+        pg_enum(DealerDocumentType, "dealer_document_type"), nullable=False
+    )
+    storage_key: Mapped[str] = mapped_column(String(512), nullable=False)
+    url: Mapped[str] = mapped_column(String(1024), nullable=False)
+    status: Mapped[DealerDocumentStatus] = mapped_column(
+        pg_enum(DealerDocumentStatus, "dealer_document_status"), default=DealerDocumentStatus.PENDING
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    dealer_store: Mapped[DealerStoreModel] = relationship(back_populates="documents")
 
 
 engine = create_async_engine(
