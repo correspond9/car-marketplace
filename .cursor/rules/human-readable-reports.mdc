@@ -1,0 +1,33 @@
+---
+description: Present comparisons, margins, and ops data in plain human-readable format
+alwaysApply: true
+---
+
+# Human-readable data presentation
+
+When reporting numbers, comparisons, backups, or verification results to the user:
+
+## Do
+
+- Use **plain English** section titles and short intro (what was compared, when, which market/expiry).
+- Format money as **Indian style** when helpful: ₹2,22,054 or "about ₹2.2 lakh".
+- Use a **simple table** with columns non-technical readers understand, e.g.:
+  - Strategy name | Our number | Dhan number | Gap in plain words (e.g. "12% lower")
+- Add a **3–5 bullet summary** (what passed, what failed, what to do next).
+- Explain **SKIP** and outliers in one sentence each.
+
+## Do not
+
+- Dump raw subagent/JSON-style tables with only `Diff %` and `internal_span` without translation.
+- Lead with file paths, commit SHAs, or `margin_source` codes without explaining what they mean.
+- Say "PASS/WARN/FAIL" alone without saying whether we charge **more** or **less** than Dhan.
+- Save a table to a file **instead of** showing a readable version in the chat (files are optional; chat must be readable).
+
+## Margin / basket comparisons
+
+Always include a column or phrase like **"In plain words"** (e.g. "Calculator asks 30% more than Dhan").
+Note when definitions differ (e.g. long option premium vs ₹0 SPAN-only).
+
+## Ops / backups
+
+State **what was backed up**, **where the file is**, **size in MB**, and **one caveat** in plain language (e.g. "price table was empty in this dump").

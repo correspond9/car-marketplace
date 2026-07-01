@@ -1,0 +1,88 @@
+openapi: 3.1.0
+info:
+  title: CarMarket API
+  version: 0.1.0
+  description: India used car marketplace REST API
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development
+paths:
+  /health:
+    get:
+      summary: Liveness check
+      tags: [health]
+      responses:
+        "200":
+          description: OK
+  /auth/otp/request:
+    post:
+      summary: Request OTP
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone:
+                  type: string
+      responses:
+        "204":
+          description: OTP sent
+  /auth/otp/verify:
+    post:
+      summary: Verify OTP and receive tokens
+      tags: [auth]
+      responses:
+        "200":
+          description: Tokens issued
+  /listings:
+    get:
+      summary: Search listings
+      tags: [listings]
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: city
+          in: query
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Listing search results
+    post:
+      summary: Create listing
+      tags: [listings]
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Created
+  /listings/{id}:
+    get:
+      summary: Get listing detail
+      tags: [listings]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Listing detail
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

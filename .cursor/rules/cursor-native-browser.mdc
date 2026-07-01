@@ -1,0 +1,44 @@
+---
+description: Default to Cursor native Browser Tab; external Playwright only when user asks
+alwaysApply: true
+---
+
+# Cursor browser policy (mandatory)
+
+## Default: native Browser Tab
+
+Use the **Browser Tab** pane beside chat (user's logged-in session). Do **not** open external Chrome or call `plugin-playwright-playwright` tools unless both conditions below are met.
+
+## External browser (Playwright) — only when explicitly requested
+
+Use **external Playwright Chrome** (`plugin-playwright-playwright-*`) **only if**:
+
+1. The user **explicitly asks** for external browser / Playwright / separate Chrome window, **and**
+2. The user has turned **ON** the Playwright plugin: **Cursor Settings → Tools & MCP → Plugin MCP Servers → playwright**.
+
+If the user did not ask for external browser, or Playwright plugin is OFF → use native Browser Tab only.
+
+## Conflict warning
+
+When **both** Browser Tab and Playwright plugin are ON, Playwright often hijacks browser calls to external Chrome (`about:blank` or Login). If that happens while the user wanted the native tab, tell them to run `tools/fix_cursor_native_browser_state.ps1` (Cursor closed) and disable third-party skills import + Playwright MCP.
+
+## Known blockers (this machine)
+
+- `composerState.yoloMcpToolsDisabled: true` — MCP tools disabled in Auto-Run; patch via `fix_cursor_native_browser_state.ps1`
+- `composerState.playwrightProtection: true` — same script sets false
+- Third-party skills import ON — imports `~/.codex/skills/playwright/SKILL.md` (CLI skill; separate from MCP but confuses UI)
+- Agent logs route `browser_*` to `providerIdentifier=playwright` not native Browser MCP provider
+
+## Agent behavior (native tab — default)
+
+- **Do not call** any `plugin-playwright-playwright-*` tool (including `browser_tabs`, `browser_snapshot`, `browser_navigate`) unless the user explicitly asked for external Playwright **and** the plugin is ON. Those calls can spawn external Chrome even when the user wants the native tab.
+- If only Playwright tools exist and Playwright is OFF, tell the user native browser tools are not wired to this chat — do **not** try browser MCP calls.
+- When native tools are available and Playwright is off: first `browser_tabs` list, then snapshot on the existing tab only if tools are not Playwright-prefixed.
+
+## Verification before browser work
+
+`browser_tabs` (list only). Success = current tab matches what the user sees. Failure = ask user to reset Browser Automation (see `docs/ops/CURSOR_NATIVE_BROWSER.md`).
+
+## Reference
+
+`docs/ops/CURSOR_NATIVE_BROWSER.md`
