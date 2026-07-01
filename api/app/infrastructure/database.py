@@ -41,6 +41,15 @@ class Base(DeclarativeBase):
     pass
 
 
+def pg_enum(enum_class: type, name: str) -> Enum:
+    """PostgreSQL enum using StrEnum values (lowercase), not member names."""
+    return Enum(
+        enum_class,
+        name=name,
+        values_callable=lambda members: [member.value for member in members],
+    )
+
+
 class UserModel(Base):
     __tablename__ = "users"
 
@@ -48,7 +57,7 @@ class UserModel(Base):
     phone: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
     email: Mapped[str | None] = mapped_column(String(255), nullable=True)
     display_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    role: Mapped[UserRole] = mapped_column(Enum(UserRole, name="user_role"), default=UserRole.USER)
+    role: Mapped[UserRole] = mapped_column(pg_enum(UserRole, "user_role"), default=UserRole.USER)
     phone_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False)
     city: Mapped[str | None] = mapped_column(String(100), nullable=True)
@@ -89,7 +98,7 @@ class DealerStoreModel(Base):
     rating_avg: Mapped[float] = mapped_column(Numeric(3, 2), default=0)
     rating_count: Mapped[int] = mapped_column(Integer, default=0)
     verification_status: Mapped[VerificationStatus] = mapped_column(
-        Enum(VerificationStatus, name="verification_status"), default=VerificationStatus.PENDING
+        pg_enum(VerificationStatus, "verification_status"), default=VerificationStatus.PENDING
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -118,10 +127,10 @@ class ListingModel(Base):
     variant: Mapped[str | None] = mapped_column(String(150), nullable=True)
     manufacturing_year: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     registration_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    body_type: Mapped[BodyType] = mapped_column(Enum(BodyType, name="body_type"), nullable=False)
-    fuel_type: Mapped[FuelType] = mapped_column(Enum(FuelType, name="fuel_type"), nullable=False)
+    body_type: Mapped[BodyType] = mapped_column(pg_enum(BodyType, "body_type"), nullable=False)
+    fuel_type: Mapped[FuelType] = mapped_column(pg_enum(FuelType, "fuel_type"), nullable=False)
     transmission: Mapped[Transmission] = mapped_column(
-        Enum(Transmission, name="transmission"), nullable=False
+        pg_enum(Transmission, "transmission"), nullable=False
     )
     engine_capacity_cc: Mapped[int | None] = mapped_column(Integer, nullable=True)
     odometer_km: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
@@ -133,12 +142,12 @@ class ListingModel(Base):
     registration_city: Mapped[str | None] = mapped_column(String(100), nullable=True)
     registration_number_masked: Mapped[str | None] = mapped_column(String(30), nullable=True)
     rc_status: Mapped[RCStatus | None] = mapped_column(
-        Enum(RCStatus, name="rc_status"), nullable=True
+        pg_enum(RCStatus, "rc_status"), nullable=True
     )
     insurance_expiry: Mapped[datetime | None] = mapped_column(Date, nullable=True)
     puc_expiry: Mapped[datetime | None] = mapped_column(Date, nullable=True)
     loan_status: Mapped[LoanStatus | None] = mapped_column(
-        Enum(LoanStatus, name="loan_status"), nullable=True
+        pg_enum(LoanStatus, "loan_status"), nullable=True
     )
     asking_price: Mapped[int] = mapped_column(BigInteger, nullable=False, index=True)
     negotiable: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -149,7 +158,7 @@ class ListingModel(Base):
     pincode: Mapped[str | None] = mapped_column(String(10), nullable=True)
     test_drive_available: Mapped[bool] = mapped_column(Boolean, default=False)
     status: Mapped[ListingStatus] = mapped_column(
-        Enum(ListingStatus, name="listing_status"), default=ListingStatus.DRAFT, index=True
+        pg_enum(ListingStatus, "listing_status"), default=ListingStatus.DRAFT, index=True
     )
     search_vector: Mapped[str | None] = mapped_column(Text, nullable=True)
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -196,14 +205,14 @@ class ReviewModel(Base):
         UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
     )
     target_type: Mapped[ReviewTargetType] = mapped_column(
-        Enum(ReviewTargetType, name="review_target_type"), nullable=False
+        pg_enum(ReviewTargetType, "review_target_type"), nullable=False
     )
     target_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     rating: Mapped[int] = mapped_column(Integer, nullable=False)
     text: Mapped[str | None] = mapped_column(Text, nullable=True)
     seller_reply: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[ReviewStatus] = mapped_column(
-        Enum(ReviewStatus, name="review_status"), default=ReviewStatus.VISIBLE
+        pg_enum(ReviewStatus, "review_status"), default=ReviewStatus.VISIBLE
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -225,7 +234,7 @@ class InquiryModel(Base):
     )
     message: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[InquiryStatus] = mapped_column(
-        Enum(InquiryStatus, name="inquiry_status"), default=InquiryStatus.OPEN
+        pg_enum(InquiryStatus, "inquiry_status"), default=InquiryStatus.OPEN
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
