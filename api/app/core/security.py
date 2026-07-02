@@ -25,7 +25,7 @@ def verify_hash(plain: str, hashed: str) -> bool:
 
 
 def generate_otp() -> str:
-    if settings.is_development and settings.sms_provider == "mock":
+    if settings.sms_provider == "mock":
         return "123456"
     upper = 10**settings.otp_length
     return str(secrets.randbelow(upper)).zfill(settings.otp_length)
