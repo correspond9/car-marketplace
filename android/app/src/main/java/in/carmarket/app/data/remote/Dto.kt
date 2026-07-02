@@ -1,4 +1,4 @@
-package in.carmarket.app.data.remote
+package `in`.carmarket.app.data.remote
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -191,4 +191,17 @@ data class ApiErrorBody(
 data class ApiErrorDetail(
     val code: String?,
     val message: String?,
+)
+
+@JsonClass(generateAdapter = true)
+data class RecentlyViewedItemDto(
+    @Json(name = "listing_id") val listingId: String,
+    @Json(name = "viewed_at") val viewedAt: String,
+    val listing: ListingDto?,
+)
+
+@JsonClass(generateAdapter = true)
+data class RecentlyViewedListResponse(
+    val items: List<RecentlyViewedItemDto>,
+    val total: Int,
 )

@@ -1,9 +1,9 @@
-package in.carmarket.app.ui.listing
+package `in`.carmarket.app.ui.listing
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import in.carmarket.app.CarMarketApp
-import in.carmarket.app.data.remote.ListingDto
+import `in`.carmarket.app.CarMarketApp
+import `in`.carmarket.app.data.remote.ListingDto
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,6 +41,7 @@ class ListingDetailViewModel(listingId: String) : ViewModel() {
                 onSuccess = { listing ->
                     _uiState.update { it.copy(listing = listing, isLoading = false) }
                     checkFavorite(listingId)
+                    trackView(listingId)
                 },
                 onFailure = { e ->
                     _uiState.update { it.copy(isLoading = false, error = e.message) }
@@ -55,6 +56,12 @@ class ListingDetailViewModel(listingId: String) : ViewModel() {
                 val isFav = favorites.any { it.id == listingId }
                 _uiState.update { it.copy(isFavorite = isFav) }
             }
+        }
+    }
+
+    private fun trackView(listingId: String) {
+        viewModelScope.launch {
+            listingRepository.trackView(listingId)
         }
     }
 

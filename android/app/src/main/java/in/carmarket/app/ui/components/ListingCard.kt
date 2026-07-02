@@ -1,22 +1,22 @@
-package in.carmarket.app.ui.components
+package `in`.carmarket.app.ui.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import in.carmarket.app.data.remote.ListingDto
-import in.carmarket.app.ui.theme.Slate600
-import in.carmarket.app.util.PriceFormatter
+import `in`.carmarket.app.data.remote.ListingDto
+import `in`.carmarket.app.ui.theme.Slate600
+import `in`.carmarket.app.util.PriceFormatter
+import `in`.carmarket.app.util.listingFallbackDrawable
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -25,22 +25,24 @@ fun ListingCard(
     listing: ListingDto,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    imageSlot: Int = 0,
 ) {
     val cover = listing.images.firstOrNull { it.isCover } ?: listing.images.firstOrNull()
+    val imageModel = cover?.url ?: listingFallbackDrawable(listing.make, listing.model, imageSlot)
     val km = NumberFormat.getNumberInstance(Locale("en", "IN")).format(listing.odometerKm)
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+    MatteGlassCard(
+        modifier = modifier.fillMaxWidth(),
+        onClick = onClick,
     ) {
-        if (cover != null) {
+        if (imageModel != null) {
             AsyncImage(
-                model = cover.url,
+                model = imageModel,
                 contentDescription = "${listing.make} ${listing.model}",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16f / 10f),
+                    .aspectRatio(16f / 10f)
+                    .clip(MaterialTheme.shapes.medium),
                 contentScale = ContentScale.Crop,
             )
         }

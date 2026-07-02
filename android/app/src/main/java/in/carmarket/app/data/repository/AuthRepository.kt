@@ -1,10 +1,10 @@
-package in.carmarket.app.data.repository
+package `in`.carmarket.app.data.repository
 
-import in.carmarket.app.data.local.TokenStore
-import in.carmarket.app.data.remote.ApiService
-import in.carmarket.app.data.remote.OtpRequestBody
-import in.carmarket.app.data.remote.OtpVerifyBody
-import in.carmarket.app.data.remote.UserMeDto
+import `in`.carmarket.app.data.local.TokenStore
+import `in`.carmarket.app.data.remote.ApiService
+import `in`.carmarket.app.data.remote.OtpRequestBody
+import `in`.carmarket.app.data.remote.OtpVerifyBody
+import `in`.carmarket.app.data.remote.UserMeDto
 import retrofit2.HttpException
 
 class AuthRepository(
@@ -61,8 +61,16 @@ class FavoriteRepository(private val api: ApiService) {
 
 class InquiryRepository(private val api: ApiService) {
     suspend fun create(listingId: String, message: String) = apiCall {
-        api.createInquiry(listingId, in.carmarket.app.data.remote.InquiryCreateBody(message))
+        api.createInquiry(listingId, `in`.carmarket.app.data.remote.InquiryCreateBody(message))
     }
+
+    suspend fun inbox() = apiCall { api.getInquiryInbox(limit = 50).items }
+
+    suspend fun sent() = apiCall { api.getSentInquiries(limit = 50).items }
+
+    suspend fun accept(inquiryId: String) = apiCall { api.acceptInquiry(inquiryId) }
+
+    suspend fun decline(inquiryId: String) = apiCall { api.declineInquiry(inquiryId) }
 }
 
 class ApiException(message: String) : Exception(message)

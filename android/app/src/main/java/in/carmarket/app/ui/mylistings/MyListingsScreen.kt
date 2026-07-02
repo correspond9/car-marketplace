@@ -1,4 +1,4 @@
-package in.carmarket.app.ui.mylistings
+package `in`.carmarket.app.ui.mylistings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,12 +26,14 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import in.carmarket.app.ui.components.ListingCard
-import in.carmarket.app.ui.theme.Slate600
+import `in`.carmarket.app.ui.components.ListingCard
+import `in`.carmarket.app.ui.theme.Slate600
+import `in`.carmarket.app.util.buildListingImageSlots
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +43,7 @@ fun MyListingsScreen(
     viewModel: MyListingsViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val imageSlots = remember(state.listings) { buildListingImageSlots(state.listings) }
 
     Scaffold(
         topBar = {
@@ -85,6 +88,7 @@ fun MyListingsScreen(
                             Column {
                                 ListingCard(
                                     listing = listing,
+                                    imageSlot = imageSlots[listing.id] ?: 0,
                                     onClick = { onListingClick(listing.id) },
                                 )
                                 Text(

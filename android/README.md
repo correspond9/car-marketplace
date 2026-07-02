@@ -42,6 +42,8 @@ android/
 - Home feed — latest live listings from API
 - Search — filter by keyword and city
 - Listing detail — price, specs, photos, favorite toggle, contact seller (inquiry)
+- **Messages** — inbox (accept/decline) and sent inquiries (Profile → Messages)
+- **Recently viewed** — history from Profile
 - **Sell** — create listing form with multi-photo picker and presign upload flow
 - **Favorites** — saved listings
 - **My listings** — list, publish, mark sold

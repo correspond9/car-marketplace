@@ -1,4 +1,4 @@
-package in.carmarket.app.ui.navigation
+package `in`.carmarket.app.ui.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -24,15 +24,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import in.carmarket.app.CarMarketApp
-import in.carmarket.app.ui.auth.LoginScreen
-import in.carmarket.app.ui.favorites.FavoritesScreen
-import in.carmarket.app.ui.home.HomeScreen
-import in.carmarket.app.ui.listing.ListingDetailScreen
-import in.carmarket.app.ui.mylistings.MyListingsScreen
-import in.carmarket.app.ui.profile.ProfileScreen
-import in.carmarket.app.ui.search.SearchScreen
-import in.carmarket.app.ui.sell.SellListingScreen
+import `in`.carmarket.app.CarMarketApp
+import `in`.carmarket.app.ui.auth.LoginScreen
+import `in`.carmarket.app.ui.favorites.FavoritesScreen
+import `in`.carmarket.app.ui.home.HomeScreen
+import `in`.carmarket.app.ui.inquiries.InquiriesScreen
+import `in`.carmarket.app.ui.listing.ListingDetailScreen
+import `in`.carmarket.app.ui.mylistings.MyListingsScreen
+import `in`.carmarket.app.ui.profile.ProfileScreen
+import `in`.carmarket.app.ui.recentlyviewed.RecentlyViewedScreen
+import `in`.carmarket.app.ui.search.SearchScreen
+import `in`.carmarket.app.ui.sell.SellListingScreen
 
 private data class BottomNavItem(
     val route: String,
@@ -136,11 +138,21 @@ private fun MainTabs(onLoggedOut: () -> Unit) {
                 ProfileScreen(
                     onLoggedOut = onLoggedOut,
                     onMyListings = { navController.navigate(Routes.MY_LISTINGS) },
+                    onInquiries = { navController.navigate(Routes.INQUIRIES) },
+                    onRecentlyViewed = { navController.navigate(Routes.RECENTLY_VIEWED) },
                 )
             }
             composable(Routes.MY_LISTINGS) {
                 MyListingsScreen(
                     onBack = { navController.popBackStack() },
+                    onListingClick = { id -> navController.navigate(Routes.listing(id)) },
+                )
+            }
+            composable(Routes.INQUIRIES) {
+                InquiriesScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Routes.RECENTLY_VIEWED) {
+                RecentlyViewedScreen(
                     onListingClick = { id -> navController.navigate(Routes.listing(id)) },
                 )
             }

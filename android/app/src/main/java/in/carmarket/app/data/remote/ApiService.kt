@@ -1,4 +1,4 @@
-package in.carmarket.app.data.remote
+package `in`.carmarket.app.data.remote
 
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -39,6 +39,12 @@ interface ApiService {
 
     @GET("listings/{id}")
     suspend fun getListing(@Path("id") id: String): ListingDto
+
+    @POST("listings/{id}/view")
+    suspend fun trackListingView(@Path("id") id: String)
+
+    @GET("users/me/recently-viewed")
+    suspend fun getRecentlyViewed(): RecentlyViewedListResponse
 
     @POST("listings")
     suspend fun createListing(@Body body: ListingCreateBody): ListingDto

@@ -1,4 +1,4 @@
-package in.carmarket.app.ui.profile
+package `in`.carmarket.app.ui.profile
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,13 +22,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import in.carmarket.app.ui.theme.Slate600
+import `in`.carmarket.app.ui.theme.Slate600
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     onLoggedOut: () -> Unit,
     onMyListings: () -> Unit,
+    onInquiries: () -> Unit,
+    onRecentlyViewed: () -> Unit,
     viewModel: ProfileViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -93,6 +95,18 @@ fun ProfileScreen(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text("My listings")
+                    }
+                    Button(
+                        onClick = onInquiries,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text("Messages")
+                    }
+                    Button(
+                        onClick = onRecentlyViewed,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text("Recently viewed")
                     }
                     OutlinedButton(
                         onClick = {

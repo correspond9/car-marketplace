@@ -1,4 +1,4 @@
-package in.carmarket.app.ui.listing
+package `in`.carmarket.app.ui.listing
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,8 +33,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import in.carmarket.app.ui.theme.Slate600
-import in.carmarket.app.util.PriceFormatter
+import `in`.carmarket.app.ui.components.MatteGlassCard
+import `in`.carmarket.app.ui.theme.Slate600
+import `in`.carmarket.app.util.PriceFormatter
+import `in`.carmarket.app.util.listingFallbackDrawable
+import `in`.carmarket.app.util.listingImageSlotFromVariant
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -132,10 +135,12 @@ fun ListingDetailScreen(
                         .padding(padding)
                         .verticalScroll(rememberScrollState()),
                 ) {
-                    val image = listing.images.firstOrNull()
-                    if (image != null) {
+                    val cover = listing.images.firstOrNull { it.isCover } ?: listing.images.firstOrNull()
+                    val imageSlot = listingImageSlotFromVariant(listing.make, listing.model, listing.variant)
+                    val imageModel = cover?.url ?: listingFallbackDrawable(listing.make, listing.model, imageSlot)
+                    if (imageModel != null) {
                         AsyncImage(
-                            model = image.url,
+                            model = imageModel,
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -143,6 +148,8 @@ fun ListingDetailScreen(
                             contentScale = ContentScale.Crop,
                         )
                     }
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        MatteGlassCard(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             buildString {
@@ -188,6 +195,8 @@ fun ListingDetailScreen(
                                 .padding(top = 24.dp),
                         ) {
                             Text("Contact seller")
+                        }
+                            }
                         }
                     }
                 }

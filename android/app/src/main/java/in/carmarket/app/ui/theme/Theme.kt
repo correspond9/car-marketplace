@@ -1,4 +1,4 @@
-package in.carmarket.app.ui.theme
+package `in`.carmarket.app.ui.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
@@ -11,8 +11,9 @@ private val LightColors = lightColorScheme(
     secondary = Green800,
     background = Slate50,
     onBackground = Slate900,
-    surface = Color.White,
+    surface = MatteGlassSurface,
     onSurface = Slate900,
+    surfaceVariant = Slate100,
 )
 
 @Composable

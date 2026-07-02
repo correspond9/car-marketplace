@@ -1,4 +1,4 @@
-package in.carmarket.app.ui.search
+package `in`.carmarket.app.ui.search
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,11 +18,14 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import in.carmarket.app.ui.components.ListingCard
-import in.carmarket.app.ui.theme.Slate600
+import `in`.carmarket.app.ui.components.ListingCard
+import `in`.carmarket.app.ui.components.MatteGlassCard
+import `in`.carmarket.app.ui.theme.Slate600
+import `in`.carmarket.app.util.buildListingImageSlots
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,6 +34,7 @@ fun SearchScreen(
     viewModel: SearchViewModel = viewModel(),
 ) {
     val state by viewModel.uiState.collectAsState()
+    val imageSlots = remember(state.listings) { buildListingImageSlots(state.listings) }
 
     Scaffold(
         topBar = {
@@ -43,6 +47,8 @@ fun SearchScreen(
                 .padding(padding)
                 .padding(16.dp),
         ) {
+            MatteGlassCard(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp)) {
             OutlinedTextField(
                 value = state.query,
                 onValueChange = viewModel::onQueryChange,
@@ -68,6 +74,8 @@ fun SearchScreen(
             ) {
                 Text("Search")
             }
+                }
+            }
 
             if (state.isLoading) {
                 CircularProgressIndicator(modifier = Modifier.padding(top = 24.dp))
@@ -88,7 +96,11 @@ fun SearchScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     items(state.listings, key = { it.id }) { listing ->
-                        ListingCard(listing = listing, onClick = { onListingClick(listing.id) })
+                        ListingCard(
+                            listing = listing,
+                            imageSlot = imageSlots[listing.id] ?: 0,
+                            onClick = { onListingClick(listing.id) },
+                        )
                     }
                 }
             }

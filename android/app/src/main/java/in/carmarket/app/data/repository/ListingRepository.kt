@@ -1,14 +1,14 @@
-package in.carmarket.app.data.repository
+package `in`.carmarket.app.data.repository
 
 import android.content.ContentResolver
 import android.net.Uri
-import in.carmarket.app.data.remote.ApiService
-import in.carmarket.app.data.remote.ImageConfirmBody
-import in.carmarket.app.data.remote.ImagePresignRequestBody
-import in.carmarket.app.data.remote.ImageUploadHelper
-import in.carmarket.app.data.remote.ListingCreateBody
-import in.carmarket.app.data.remote.ListingDto
-import in.carmarket.app.data.remote.ListingImageDto
+import `in`.carmarket.app.data.remote.ApiService
+import `in`.carmarket.app.data.remote.ImageConfirmBody
+import `in`.carmarket.app.data.remote.ImagePresignRequestBody
+import `in`.carmarket.app.data.remote.ImageUploadHelper
+import `in`.carmarket.app.data.remote.ListingCreateBody
+import `in`.carmarket.app.data.remote.ListingDto
+import `in`.carmarket.app.data.remote.ListingImageDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -35,6 +35,14 @@ class ListingRepository(private val api: ApiService) {
 
     suspend fun getById(id: String): Result<ListingDto> = apiCall {
         api.getListing(id)
+    }
+
+    suspend fun trackView(id: String): Result<Unit> = apiCall {
+        api.trackListingView(id)
+    }
+
+    suspend fun getRecentlyViewed(): Result<List<ListingDto>> = apiCall {
+        api.getRecentlyViewed().items.mapNotNull { it.listing }
     }
 
     suspend fun create(body: ListingCreateBody): Result<ListingDto> = apiCall {
