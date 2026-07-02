@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir .
 COPY app ./app
 COPY alembic ./alembic
 COPY alembic.ini .
+COPY seed_assets ./seed_assets
 
 ENV PYTHONUNBUFFERED=1
 EXPOSE 8000

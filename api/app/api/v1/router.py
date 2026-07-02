@@ -4,6 +4,7 @@ from app.api.v1 import (
     admin,
     auth,
     dealer_stores,
+    dev_seed,
     favorites,
     health,
     inquiries,
@@ -32,3 +33,4 @@ api_router.include_router(admin.router)
 api_router.include_router(platform.router)
 api_router.include_router(notifications.router)
 api_router.include_router(health.router)
+api_router.include_router(dev_seed.router)
