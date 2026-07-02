@@ -81,10 +81,6 @@ body {
     animation: none !important;
   }
 
-  .login-bg-video {
-    display: none;
-  }
-
   .btn-matte-primary,
   .btn-matte-secondary {
     transition: none;
