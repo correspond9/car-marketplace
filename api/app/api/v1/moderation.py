@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_db, require_roles
+from app.api.listing_helpers import listing_to_out
 from app.api.schemas import ListingOut, RejectListingRequest
 from app.application.audit import log_audit
 from app.application.listing_service import ListingError, ListingService
@@ -23,7 +24,11 @@ async def moderation_queue(
 ) -> list[ListingOut]:
     service = ListingService(db)
     items = await service.list_pending_moderation(page=page, limit=limit)
-    return [ListingOut.model_validate(i) for i in items]
+    return await _listings_to_out(db, items)
+
+
+async def _listings_to_out(db: AsyncSession, items: list) -> list[ListingOut]:
+    return [await listing_to_out(db, item) for item in items]
 
 
 @router.post("/listings/{listing_id}/approve", response_model=ListingOut)
@@ -53,7 +58,7 @@ async def approve_listing(
         entity_type="listing",
         entity_id=listing.id,
     )
-    return ListingOut.model_validate(listing)
+    return await listing_to_out(db, listing)
 
 
 @router.post("/listings/{listing_id}/reject", response_model=ListingOut)
@@ -85,4 +90,4 @@ async def reject_listing(
         entity_id=listing.id,
         metadata={"reason": body.reason},
     )
-    return ListingOut.model_validate(listing)
+    return await listing_to_out(db, listing)

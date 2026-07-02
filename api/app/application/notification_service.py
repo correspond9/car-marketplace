@@ -58,6 +58,8 @@ class RecentlyViewedService:
         self.db = db
 
     async def track(self, user_id: uuid.UUID, listing_id: uuid.UUID) -> None:
+        from datetime import UTC, datetime
+
         result = await self.db.execute(
             select(RecentlyViewedModel).where(
                 RecentlyViewedModel.user_id == user_id,
@@ -66,9 +68,7 @@ class RecentlyViewedService:
         )
         row = result.scalar_one_or_none()
         if row:
-            from sqlalchemy.sql import func
-
-            row.viewed_at = func.now()
+            row.viewed_at = datetime.now(UTC)
         else:
             self.db.add(RecentlyViewedModel(user_id=user_id, listing_id=listing_id))
         await self.db.flush()

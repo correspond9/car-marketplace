@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user, get_current_user_optional, get_db
+from app.api.listing_helpers import listing_to_out
 from app.api.schemas import (
     ImageConfirmRequest,
     ImagePresignRequest,
@@ -18,10 +19,15 @@ from app.api.schemas import (
 )
 from app.application.image_service import ImageError, ImageService
 from app.application.listing_service import ListingError, ListingService
-from app.domain.enums import SortOption
+from app.application.notification_service import RecentlyViewedService
+from app.domain.enums import ListingStatus, SortOption
 from app.infrastructure.database import UserModel
 
 router = APIRouter(prefix="/listings", tags=["listings"])
+
+
+async def _listings_to_out(db: AsyncSession, items: list) -> list[ListingOut]:
+    return [await listing_to_out(db, item) for item in items]
 
 
 def _listing_http_error(exc: ListingError) -> HTTPException:
@@ -47,7 +53,7 @@ async def my_listings(
     items, total = await service.list_my(user, page=page, limit=limit)
     pages = math.ceil(total / limit) if total else 0
     return ListingListResponse(
-        items=[ListingOut.model_validate(i) for i in items],
+        items=await _listings_to_out(db, items),
         total=total,
         page=page,
         limit=limit,
@@ -98,7 +104,7 @@ async def search_listings(
     )
     pages = math.ceil(total / limit) if total else 0
     return ListingListResponse(
-        items=[ListingOut.model_validate(i) for i in items],
+        items=await _listings_to_out(db, items),
         total=total,
         page=page,
         limit=limit,
@@ -120,7 +126,21 @@ async def get_listing(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": {"code": "NOT_FOUND", "message": "Listing not found"}},
         )
-    return ListingOut.model_validate(listing)
+    if user and listing.status == ListingStatus.LIVE:
+        await RecentlyViewedService(db).track(user.id, listing.id)
+    return await listing_to_out(db, listing)
+
+
+@router.post("/{listing_id}/view", status_code=status.HTTP_204_NO_CONTENT)
+async def track_listing_view(
+    listing_id: uuid.UUID,
+    user: Annotated[UserModel, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> None:
+    service = ListingService(db)
+    listing = await service.get_by_id(listing_id)
+    if listing and listing.status == ListingStatus.LIVE:
+        await RecentlyViewedService(db).track(user.id, listing.id)
 
 
 @router.post("", response_model=ListingOut, status_code=status.HTTP_201_CREATED)
@@ -132,7 +152,7 @@ async def create_listing(
     service = ListingService(db)
     listing = await service.create(user, body.model_dump())
     await db.refresh(listing, attribute_names=["images"])
-    return ListingOut.model_validate(listing)
+    return await listing_to_out(db, listing)
 
 
 @router.patch("/{listing_id}", response_model=ListingOut)
@@ -154,7 +174,7 @@ async def update_listing(
     except ListingError as exc:
         raise _listing_http_error(exc) from exc
     await db.refresh(listing, attribute_names=["images"])
-    return ListingOut.model_validate(listing)
+    return await listing_to_out(db, listing)
 
 
 @router.post("/{listing_id}/publish", response_model=ListingOut)
@@ -174,7 +194,7 @@ async def publish_listing(
         listing = await service.publish(listing, user)
     except ListingError as exc:
         raise _listing_http_error(exc) from exc
-    return ListingOut.model_validate(listing)
+    return await listing_to_out(db, listing)
 
 
 @router.delete("/{listing_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -213,7 +233,7 @@ async def mark_listing_sold(
         listing = await service.mark_sold(listing, user)
     except ListingError as exc:
         raise _listing_http_error(exc) from exc
-    return ListingOut.model_validate(listing)
+    return await listing_to_out(db, listing)
 
 
 @router.post("/{listing_id}/renew", response_model=ListingOut)
@@ -233,7 +253,7 @@ async def renew_listing(
         listing = await service.renew(listing, user)
     except ListingError as exc:
         raise _listing_http_error(exc) from exc
-    return ListingOut.model_validate(listing)
+    return await listing_to_out(db, listing)
 
 
 @router.post("/{listing_id}/duplicate", response_model=ListingOut, status_code=status.HTTP_201_CREATED)
@@ -254,7 +274,7 @@ async def duplicate_listing(
     except ListingError as exc:
         raise _listing_http_error(exc) from exc
     await db.refresh(new_listing, attribute_names=["images"])
-    return ListingOut.model_validate(new_listing)
+    return await listing_to_out(db, new_listing)
 
 
 @router.post("/{listing_id}/images/presign", response_model=ImagePresignResponse)

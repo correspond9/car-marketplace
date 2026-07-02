@@ -10,6 +10,7 @@ from app.api.v1 import (
     listings,
     moderation,
     notifications,
+    platform,
     reports,
     reviews,
     saved_searches,
@@ -28,5 +29,6 @@ api_router.include_router(reports.router)
 api_router.include_router(saved_searches.router)
 api_router.include_router(moderation.router)
 api_router.include_router(admin.router)
+api_router.include_router(platform.router)
 api_router.include_router(notifications.router)
 api_router.include_router(health.router)

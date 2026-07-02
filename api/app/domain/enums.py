@@ -17,6 +17,11 @@ class ListingStatus(StrEnum):
     REMOVED = "removed"
 
 
+class ModerationMode(StrEnum):
+    MANUAL = "manual"
+    AUTO = "auto"
+
+
 class FuelType(StrEnum):
     PETROL = "petrol"
     DIESEL = "diesel"

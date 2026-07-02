@@ -1,5 +1,6 @@
 import pytest
 from httpx import AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 LISTING_PAYLOAD = {
@@ -48,6 +49,61 @@ async def _create_live_listing(
             headers=moderator_headers,
         )
     return listing_id
+
+
+@pytest.mark.asyncio
+async def test_dealer_listing_shows_contact_by_default(
+    client: AsyncClient, moderator_headers: dict[str, str]
+) -> None:
+    dealer_headers = await _auth(client, "9555555555")
+    await client.post(
+        "/api/v1/dealer-stores",
+        json={"name": "Contact Motors", "city": "Mumbai", "phone": "9555555555"},
+        headers=dealer_headers,
+    )
+    create = await client.post("/api/v1/listings", json=LISTING_PAYLOAD, headers=dealer_headers)
+    assert create.json()["show_contact_publicly"] is True
+
+    listing_id = await _create_live_listing(client, dealer_headers, moderator_headers)
+    listing = await client.get(f"/api/v1/listings/{listing_id}")
+    assert listing.json()["seller_contact_phone"] is not None
+
+
+@pytest.mark.asyncio
+async def test_auto_moderation_publishes_live(
+    client: AsyncClient, db_session: AsyncSession
+) -> None:
+    from app.application.platform_service import PlatformService
+    from app.domain.enums import ModerationMode
+
+    await PlatformService(db_session).update(moderation_mode=ModerationMode.AUTO)
+
+    seller_headers = await _auth(client, "9666666666")
+    create = await client.post("/api/v1/listings", json=LISTING_PAYLOAD, headers=seller_headers)
+    listing_id = create.json()["id"]
+    for i in range(5):
+        presign = await client.post(
+            f"/api/v1/listings/{listing_id}/images/presign",
+            json={"filename": f"photo{i}.jpg", "content_type": "image/jpeg"},
+            headers=seller_headers,
+        )
+        storage_key = presign.json()["storage_key"]
+        await client.post(
+            f"/api/v1/listings/{listing_id}/images/confirm",
+            json={"storage_key": storage_key, "sort_order": i, "is_cover": i == 0},
+            headers=seller_headers,
+        )
+    publish = await client.post(f"/api/v1/listings/{listing_id}/publish", headers=seller_headers)
+    assert publish.json()["status"] == "live"
+
+
+@pytest.mark.asyncio
+async def test_platform_settings_public(client: AsyncClient) -> None:
+    response = await client.get("/api/v1/platform/settings")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["brand_name"] == "Car-Market"
+    assert data["brand_domain"] == "carmarket.in"
 
 
 @pytest.mark.asyncio

@@ -12,10 +12,15 @@ from app.api.schemas import (
     AuditLogOut,
     DealerStoreOut,
     DealerVerifyRequest,
+    LogoConfirmRequest,
+    LogoPresignRequest,
+    PlatformSettingsAdminOut,
+    PlatformSettingsUpdate,
 )
 from app.application.admin_service import AdminService
 from app.application.audit import log_audit
 from app.application.dealer_service import DealerError, DealerService
+from app.application.platform_service import PlatformService
 from app.domain.enums import UserRole
 from app.infrastructure.database import UserModel
 
@@ -96,3 +101,70 @@ async def list_audit_logs(
         page=page,
         limit=limit,
     )
+
+
+@router.get("/platform-settings", response_model=PlatformSettingsAdminOut)
+async def get_platform_settings_admin(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    _admin: Annotated[UserModel, Depends(require_roles(UserRole.ADMIN))],
+) -> PlatformSettingsAdminOut:
+    settings = await PlatformService(db).get_or_create()
+    return PlatformSettingsAdminOut.model_validate(settings)
+
+
+@router.patch("/platform-settings", response_model=PlatformSettingsAdminOut)
+async def update_platform_settings(
+    body: PlatformSettingsUpdate,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    admin: Annotated[UserModel, Depends(require_roles(UserRole.ADMIN))],
+) -> PlatformSettingsAdminOut:
+    service = PlatformService(db)
+    try:
+        settings = await service.update(**body.model_dump(exclude_unset=True))
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": {"code": "VALIDATION_ERROR", "message": str(exc)}},
+        ) from exc
+    await log_audit(
+        db,
+        actor_id=admin.id,
+        action="platform.settings_update",
+        entity_type="platform_settings",
+        entity_id=admin.id,
+        metadata=body.model_dump(exclude_unset=True),
+    )
+    return PlatformSettingsAdminOut.model_validate(settings)
+
+
+@router.post("/platform-settings/logo/presign")
+async def presign_platform_logo(
+    body: LogoPresignRequest,
+    _admin: Annotated[UserModel, Depends(require_roles(UserRole.ADMIN))],
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> dict:
+    return PlatformService(db).presign_logo(filename=body.filename, content_type=body.content_type)
+
+
+@router.post("/platform-settings/logo/confirm", response_model=PlatformSettingsAdminOut)
+async def confirm_platform_logo(
+    body: LogoConfirmRequest,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    admin: Annotated[UserModel, Depends(require_roles(UserRole.ADMIN))],
+) -> PlatformSettingsAdminOut:
+    service = PlatformService(db)
+    try:
+        settings = await service.confirm_logo(body.storage_key)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={"error": {"code": "VALIDATION_ERROR", "message": str(exc)}},
+        ) from exc
+    await log_audit(
+        db,
+        actor_id=admin.id,
+        action="platform.logo_update",
+        entity_type="platform_settings",
+        entity_id=admin.id,
+    )
+    return PlatformSettingsAdminOut.model_validate(settings)

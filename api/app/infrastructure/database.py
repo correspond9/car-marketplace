@@ -30,6 +30,7 @@ from app.domain.enums import (
     InquiryStatus,
     ListingStatus,
     LoanStatus,
+    ModerationMode,
     NotificationType,
     RCStatus,
     ReportEntityType,
@@ -164,6 +165,8 @@ class ListingModel(Base):
     locality: Mapped[str | None] = mapped_column(String(150), nullable=True)
     pincode: Mapped[str | None] = mapped_column(String(10), nullable=True)
     test_drive_available: Mapped[bool] = mapped_column(Boolean, default=False)
+    show_contact_publicly: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_featured: Mapped[bool] = mapped_column(Boolean, default=False)
     status: Mapped[ListingStatus] = mapped_column(
         pg_enum(ListingStatus, "listing_status"), default=ListingStatus.DRAFT, index=True
     )
@@ -380,6 +383,24 @@ class DealerDocumentModel(Base):
     )
 
     dealer_store: Mapped[DealerStoreModel] = relationship(back_populates="documents")
+
+
+class PlatformSettingsModel(Base):
+    __tablename__ = "platform_settings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
+    brand_name: Mapped[str] = mapped_column(String(120), default="Car-Market", nullable=False)
+    brand_domain: Mapped[str] = mapped_column(String(255), default="carmarket.in", nullable=False)
+    logo_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    moderation_mode: Mapped[ModerationMode] = mapped_column(
+        pg_enum(ModerationMode, "moderation_mode"), default=ModerationMode.MANUAL, nullable=False
+    )
+    enable_featured_listings: Mapped[bool] = mapped_column(Boolean, default=False)
+    enable_dealer_subscriptions: Mapped[bool] = mapped_column(Boolean, default=False)
+    enable_paid_listings: Mapped[bool] = mapped_column(Boolean, default=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
 
 engine = create_async_engine(

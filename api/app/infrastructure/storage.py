@@ -54,6 +54,10 @@ class StorageService:
         ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "jpg"
         return f"listings/{listing_id}/{uuid.uuid4()}.{ext}"
 
+    def build_brand_logo_key(self, filename: str) -> str:
+        ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "png"
+        return f"brand/logo.{ext}"
+
     def build_public_url(self, storage_key: str) -> str:
         if settings.s3_public_url:
             return f"{settings.s3_public_url.rstrip('/')}/{storage_key}"

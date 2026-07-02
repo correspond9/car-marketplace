@@ -6,10 +6,12 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from app.application.contact_privacy import default_show_contact_for_role
+from app.application.platform_service import PlatformService
 from app.core.config import settings
 from app.core.security import mask_registration_number
-from app.domain.enums import ListingStatus, SortOption, UserRole
-from app.infrastructure.database import ListingModel, UserModel
+from app.domain.enums import ListingStatus, ModerationMode, SortOption, UserRole
+from app.infrastructure.database import DealerStoreModel, ListingModel, UserModel
 
 
 class ListingError(Exception):
@@ -47,11 +49,18 @@ class ListingService:
 
     async def create(self, seller: UserModel, data: dict) -> ListingModel:
         reg_number = data.pop("registration_number", None)
+        if "show_contact_publicly" not in data or data["show_contact_publicly"] is None:
+            data["show_contact_publicly"] = default_show_contact_for_role(seller.role)
         listing = ListingModel(seller_id=seller.id, status=ListingStatus.DRAFT, **data)
         if reg_number:
             listing.registration_number_masked = mask_registration_number(reg_number)
-        if seller.role == UserRole.DEALER and seller.dealer_store:
-            listing.dealer_store_id = seller.dealer_store.id
+        if seller.role == UserRole.DEALER:
+            store_result = await self.db.execute(
+                select(DealerStoreModel).where(DealerStoreModel.owner_id == seller.id)
+            )
+            dealer_store = store_result.scalar_one_or_none()
+            if dealer_store:
+                listing.dealer_store_id = dealer_store.id
         self._update_search_vector(listing)
         self.db.add(listing)
         await self.db.flush()
@@ -62,7 +71,11 @@ class ListingService:
     ) -> ListingModel | None:
         query = (
             select(ListingModel)
-            .options(selectinload(ListingModel.images), selectinload(ListingModel.seller))
+            .options(
+                selectinload(ListingModel.images),
+                selectinload(ListingModel.seller),
+                selectinload(ListingModel.dealer_store),
+            )
             .where(ListingModel.id == listing_id)
         )
         result = await self.db.execute(query)
@@ -107,7 +120,12 @@ class ListingService:
                 "VALIDATION_ERROR",
             )
 
-        listing.status = ListingStatus.PENDING_REVIEW
+        platform = await PlatformService(self.db).get_or_create()
+        listing.status = (
+            ListingStatus.LIVE
+            if platform.moderation_mode == ModerationMode.AUTO
+            else ListingStatus.PENDING_REVIEW
+        )
         listing.published_at = datetime.now(UTC)
         listing.expires_at = datetime.now(UTC) + timedelta(days=settings.listing_expiry_days)
         await self.db.flush()
@@ -313,6 +331,7 @@ class ListingService:
             "locality",
             "pincode",
             "test_drive_available",
+            "show_contact_publicly",
             "dealer_store_id",
         )
         data = {field: getattr(listing, field) for field in copy_fields}

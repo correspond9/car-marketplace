@@ -8,7 +8,7 @@ from app.api.dependencies import get_current_user, get_db
 from app.api.schemas import InquiryCreate, InquiryListResponse, InquiryOut
 from app.application.inquiry_service import InquiryError, InquiryService
 from app.domain.enums import InquiryStatus
-from app.infrastructure.database import InquiryModel, UserModel
+from app.infrastructure.database import InquiryModel, ListingModel, UserModel
 
 router = APIRouter(tags=["inquiries"])
 
@@ -17,8 +17,12 @@ async def _inquiry_to_out(
     db: AsyncSession, inquiry: InquiryModel, viewer: UserModel
 ) -> InquiryOut:
     buyer, seller = await InquiryService.load_phones(db, inquiry)
+    listing = await db.get(ListingModel, inquiry.listing_id)
     out = InquiryOut.model_validate(inquiry)
-    if viewer.id == inquiry.buyer_id and inquiry.status == InquiryStatus.ACCEPTED:
+    if viewer.id == inquiry.buyer_id and (
+        inquiry.status == InquiryStatus.ACCEPTED
+        or (listing and listing.show_contact_publicly)
+    ):
         out.seller_phone = seller.phone if seller else None
     elif viewer.id == inquiry.seller_id:
         out.buyer_phone = buyer.phone if buyer else None

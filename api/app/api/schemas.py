@@ -10,6 +10,7 @@ from app.domain.enums import (
     ListingStatus,
     LoanStatus,
     RCStatus,
+    ModerationMode,
     ReportReason,
     ReviewStatus,
     ReviewTargetType,
@@ -119,6 +120,7 @@ class ListingCreate(BaseModel):
     locality: str | None = Field(None, max_length=150)
     pincode: str | None = Field(None, max_length=10)
     test_drive_available: bool = False
+    show_contact_publicly: bool | None = None
 
 
 class ListingUpdate(BaseModel):
@@ -151,6 +153,7 @@ class ListingUpdate(BaseModel):
     locality: str | None = None
     pincode: str | None = None
     test_drive_available: bool | None = None
+    show_contact_publicly: bool | None = None
 
 
 class ListingOut(BaseModel):
@@ -188,12 +191,15 @@ class ListingOut(BaseModel):
     locality: str | None
     pincode: str | None
     test_drive_available: bool
+    show_contact_publicly: bool
+    is_featured: bool = False
     status: ListingStatus
     published_at: datetime | None
     expires_at: datetime | None
     sold_at: datetime | None = None
     created_at: datetime
     images: list[ListingImageOut] = Field(default_factory=list)
+    seller_contact_phone: str | None = None
 
 
 class ListingListResponse(BaseModel):
@@ -307,6 +313,17 @@ class InquiryListResponse(BaseModel):
     total: int
     page: int
     limit: int
+
+
+class RecentlyViewedItemOut(BaseModel):
+    listing_id: UUID
+    viewed_at: datetime
+    listing: ListingOut | None = None
+
+
+class RecentlyViewedListResponse(BaseModel):
+    items: list[RecentlyViewedItemOut]
+    total: int
 
 
 class ReviewCreate(BaseModel):
@@ -426,3 +443,40 @@ class AuditLogListResponse(BaseModel):
     total: int
     page: int
     limit: int
+
+
+class PlatformSettingsPublicOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    brand_name: str
+    brand_domain: str
+    logo_url: str | None = None
+
+
+class PlatformSettingsAdminOut(PlatformSettingsPublicOut):
+    model_config = ConfigDict(from_attributes=True)
+
+    moderation_mode: ModerationMode
+    enable_featured_listings: bool
+    enable_dealer_subscriptions: bool
+    enable_paid_listings: bool
+    updated_at: datetime
+
+
+class PlatformSettingsUpdate(BaseModel):
+    brand_name: str | None = Field(None, min_length=2, max_length=120)
+    brand_domain: str | None = Field(None, min_length=4, max_length=255)
+    logo_url: str | None = Field(None, max_length=1024)
+    moderation_mode: ModerationMode | None = None
+    enable_featured_listings: bool | None = None
+    enable_dealer_subscriptions: bool | None = None
+    enable_paid_listings: bool | None = None
+
+
+class LogoPresignRequest(BaseModel):
+    filename: str = Field(..., max_length=255)
+    content_type: str = Field(..., max_length=100)
+
+
+class LogoConfirmRequest(BaseModel):
+    storage_key: str = Field(..., max_length=512)
