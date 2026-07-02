@@ -56,6 +56,23 @@ export function SiteHeader() {
               Admin
             </Link>
           )}
+          <a
+            href="/downloads/carmarket-android.apk"
+            download="CarMarket-android.apk"
+            className="btn-matte-secondary inline-flex shrink-0 items-center gap-1.5 px-3 py-1.5 text-sm"
+            aria-label="Download Car-Market Android app"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="h-4 w-4 shrink-0"
+              aria-hidden
+            >
+              <path d="M17.6 9.48l1.84-3.18c.16-.28.06-.62-.22-.78a.6.6 0 00-.78.22l-1.87 3.24a11.43 11.43 0 00-8.58 0L5.12 5.74a.6.6 0 00-.78-.22c-.28.16-.38.5-.22.78L5.96 9.48A10.81 10.81 0 001 18h22a10.81 10.81 0 00-4.96-8.52zM7 15.25a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5zm10 0a1.25 1.25 0 110-2.5 1.25 1.25 0 010 2.5z" />
+            </svg>
+            Android app
+          </a>
           {!loading && (
             user ? (
               <button
