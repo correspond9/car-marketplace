@@ -4,7 +4,8 @@ import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
-import { api, ApiError, normalizePhone } from "@/lib/api";
+import { api, ApiError, normalizePhone, tokenStorage } from "@/lib/api";
+import { syncAuthCookiesFromStorage } from "@/lib/auth-cookie";
 
 function LoginForm() {
   const router = useRouter();
@@ -42,8 +43,10 @@ function LoginForm() {
     setError(null);
     try {
       await api.auth.verifyOtp(phone, otp);
+      syncAuthCookiesFromStorage(() => tokenStorage.getAccessToken());
       await refreshUser();
-      router.replace(redirect);
+      // Full page load ensures the server sees the login cookie (fixes redirect back to login).
+      window.location.assign(redirect);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "Invalid OTP");
     } finally {
@@ -54,7 +57,7 @@ function LoginForm() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10">
       <div className="animate-fade-up">
-        <h1 className="text-2xl font-bold text-white drop-shadow-sm">Log in to Car-Market</h1>
+        <h1 className="text-2xl font-bold text-white drop-shadow-sm">Login to Auto Link Marketplace</h1>
         <p className="mt-2 text-sm text-slate-200 drop-shadow-sm">
           Enter your mobile number. We will send a one-time password (OTP) to verify you.
         </p>
@@ -75,7 +78,9 @@ function LoginForm() {
                 required
                 className="input-matte mt-1"
               />
-              <p className="mt-1 text-xs text-slate-500">Example: {normalizePhone("9876543210")}</p>
+              <p className="mt-1 text-xs text-slate-500">
+                Example: {normalizePhone("9876543210")}. Test OTP: <strong>123456</strong>
+              </p>
             </div>
             {error && <p className="text-sm text-red-600">{error}</p>}
             <button type="submit" disabled={loading} className="btn-matte-primary w-full disabled:opacity-60">

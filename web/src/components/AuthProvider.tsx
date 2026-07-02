@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { api, tokenStorage, type UserMe } from "@/lib/api";
-import { setAuthCookies } from "@/lib/auth-cookie";
+import { syncAuthCookiesFromStorage } from "@/lib/auth-cookie";
 
 type AuthContextValue = {
   user: UserMe | null;
@@ -23,9 +23,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       return;
     }
+    syncAuthCookiesFromStorage(() => tokenStorage.getAccessToken());
     try {
       const me = await api.users.getMe();
       setUser(me);
+      syncAuthCookiesFromStorage(() => tokenStorage.getAccessToken());
     } catch {
       tokenStorage.clearTokens();
       setUser(null);
@@ -38,10 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (tokenStorage.isLoggedIn()) {
-      const access = tokenStorage.getAccessToken();
-      if (access) setAuthCookies(access);
-    }
+    syncAuthCookiesFromStorage(() => tokenStorage.getAccessToken());
   }, []);
 
   const logout = useCallback(async () => {
