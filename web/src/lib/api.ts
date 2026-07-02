@@ -722,6 +722,38 @@ export const api = {
     },
   },
 
+  payments: {
+    razorpayConfig() {
+      return request<{ configured: boolean; key_id: string | null; mode: string }>(
+        "/payments/razorpay/config",
+        { auth: true },
+      );
+    },
+    createRazorpayOrder(amountInr: number) {
+      return request<{
+        order_id: string;
+        amount: number;
+        currency: string;
+        receipt: string | null;
+        key_id: string;
+      }>("/payments/razorpay/orders", {
+        method: "POST",
+        body: { amount_inr: amountInr },
+        auth: true,
+      });
+    },
+    verifyRazorpayPayment(data: {
+      razorpay_order_id: string;
+      razorpay_payment_id: string;
+      razorpay_signature: string;
+    }) {
+      return request<{ verified: boolean; order_id: string; payment_id: string }>(
+        "/payments/razorpay/verify",
+        { method: "POST", body: data, auth: true },
+      );
+    },
+  },
+
   admin: {
     getPlatformSettings() {
       return request<PlatformSettingsAdmin>("/admin/platform-settings", { auth: true });

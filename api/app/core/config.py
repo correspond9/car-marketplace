@@ -28,6 +28,9 @@ class Settings(BaseSettings):
 
     listing_expiry_days: int = 90
 
+    razorpay_key_id: str = ""
+    razorpay_key_secret: str = ""
+
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]

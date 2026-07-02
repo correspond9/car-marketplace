@@ -11,6 +11,7 @@ from app.api.v1 import (
     listings,
     moderation,
     notifications,
+    payments,
     platform,
     reports,
     reviews,
@@ -32,5 +33,6 @@ api_router.include_router(moderation.router)
 api_router.include_router(admin.router)
 api_router.include_router(platform.router)
 api_router.include_router(notifications.router)
+api_router.include_router(payments.router)
 api_router.include_router(health.router)
 api_router.include_router(dev_seed.router)

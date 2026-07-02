@@ -37,6 +37,8 @@ services:
       - S3_BUCKET=carmarket-images
       - S3_PUBLIC_URL=https://files.auto.linkpc.net/carmarket-images
       - S3_REGION=us-east-1
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID:-}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET:-}
     depends_on:
       db:
         condition: service_healthy
