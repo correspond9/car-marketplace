@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ListingCard } from "@/components/ListingCard";
-import { getDealerStore, searchListings } from "@/lib/api";
+import { getDealerStore, searchListings } from "@/lib/api-server";
 
 type Props = { params: Promise<{ slug: string }> };
 

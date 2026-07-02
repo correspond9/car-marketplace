@@ -5,7 +5,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import get_current_user, get_current_user_optional, get_db
+from app.api.dependencies import get_current_user, get_db
 from app.api.listing_helpers import listing_to_out
 from app.api.schemas import (
     ImageConfirmRequest,
@@ -63,6 +63,7 @@ async def my_listings(
 
 @router.get("", response_model=ListingListResponse)
 async def search_listings(
+    user: Annotated[UserModel, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
     q: str | None = None,
     make: str | None = None,
@@ -115,18 +116,18 @@ async def search_listings(
 @router.get("/{listing_id}", response_model=ListingOut)
 async def get_listing(
     listing_id: uuid.UUID,
+    user: Annotated[UserModel, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
-    user: Annotated[UserModel | None, Depends(get_current_user_optional)],
 ) -> ListingOut:
     service = ListingService(db)
-    viewer_id = user.id if user else None
+    viewer_id = user.id
     listing = await service.get_by_id(listing_id, include_draft_for=viewer_id)
     if not listing:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail={"error": {"code": "NOT_FOUND", "message": "Listing not found"}},
         )
-    if user and listing.status == ListingStatus.LIVE:
+    if listing.status == ListingStatus.LIVE:
         await RecentlyViewedService(db).track(user.id, listing.id)
     return await listing_to_out(db, listing)
 

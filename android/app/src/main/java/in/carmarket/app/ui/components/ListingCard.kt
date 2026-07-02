@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,9 +32,13 @@ fun ListingCard(
     val imageModel = cover?.url ?: listingFallbackDrawable(listing.make, listing.model, imageSlot)
     val km = NumberFormat.getNumberInstance(Locale("en", "IN")).format(listing.odometerKm)
 
+    val cardShape = RoundedCornerShape(12.dp)
+    val imageShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
+
     MatteGlassCard(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
+        shape = cardShape,
     ) {
         if (imageModel != null) {
             AsyncImage(
@@ -42,11 +47,11 @@ fun ListingCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(16f / 10f)
-                    .clip(MaterialTheme.shapes.medium),
+                    .clip(imageShape),
                 contentScale = ContentScale.Crop,
             )
         }
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp)) {
             Text(
                 text = buildString {
                     append(listing.make)
@@ -67,7 +72,7 @@ fun ListingCard(
                 text = PriceFormatter.format(listing.askingPrice),
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier.padding(top = 6.dp),
             )
         }
     }

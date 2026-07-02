@@ -16,8 +16,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,7 +30,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import `in`.carmarket.app.ui.components.BrandLogo
 import `in`.carmarket.app.ui.components.ListingCard
 import `in`.carmarket.app.ui.components.MatteGlassCard
-import `in`.carmarket.app.ui.theme.MatteGlassHero
 import `in`.carmarket.app.ui.theme.Slate600
 import `in`.carmarket.app.util.buildListingImageSlots
 
@@ -50,20 +47,6 @@ fun HomeScreen(
 
     Scaffold(
         containerColor = Color.Transparent,
-        topBar = {
-            TopAppBar(
-                title = {
-                    BrandLogo(
-                        modifier = Modifier
-                            .height(44.dp)
-                            .padding(horizontal = 4.dp),
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MatteGlassHero,
-                ),
-            )
-        },
     ) { padding ->
         Box(
             modifier = Modifier
@@ -89,12 +72,24 @@ fun HomeScreen(
                     }
                     else -> {
                         LazyColumn(
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            contentPadding = PaddingValues(
+                                start = 12.dp,
+                                end = 12.dp,
+                                top = 4.dp,
+                                bottom = 12.dp,
+                            ),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
                             item {
+                                BrandLogo(
+                                    modifier = Modifier
+                                        .height(32.dp)
+                                        .padding(bottom = 4.dp),
+                                )
+                            }
+                            item {
                                 MatteGlassCard(modifier = Modifier.fillMaxWidth()) {
-                                    Column(modifier = Modifier.padding(16.dp)) {
+                                    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                                         Text(
                                             "Find your next used car",
                                             style = MaterialTheme.typography.headlineSmall,
@@ -102,7 +97,7 @@ fun HomeScreen(
                                         Text(
                                             "Browse verified listings across India",
                                             color = Slate600,
-                                            modifier = Modifier.padding(top = 4.dp),
+                                            modifier = Modifier.padding(top = 2.dp),
                                         )
                                     }
                                 }
@@ -111,7 +106,7 @@ fun HomeScreen(
                                 Text(
                                     "Latest used cars",
                                     style = MaterialTheme.typography.titleLarge,
-                                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+                                    modifier = Modifier.padding(top = 2.dp, bottom = 2.dp),
                                 )
                             }
                             items(state.listings, key = { it.id }) { listing ->

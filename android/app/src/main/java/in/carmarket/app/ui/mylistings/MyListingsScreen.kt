@@ -81,8 +81,13 @@ fun MyListingsScreen(
                 }
                 else -> {
                     LazyColumn(
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        contentPadding = PaddingValues(
+                            start = 12.dp,
+                            end = 12.dp,
+                            top = 4.dp,
+                            bottom = 12.dp,
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(state.listings, key = { it.id }) { listing ->
                             Column {

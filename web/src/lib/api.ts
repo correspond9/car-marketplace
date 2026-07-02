@@ -1,3 +1,5 @@
+import { clearAuthCookies, setAuthCookies } from "@/lib/auth-cookie";
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/api/v1";
 
 const TOKEN_KEYS = {
@@ -338,11 +340,13 @@ export const tokenStorage = {
     if (typeof window === "undefined") return;
     localStorage.setItem(TOKEN_KEYS.access, access);
     localStorage.setItem(TOKEN_KEYS.refresh, refresh);
+    setAuthCookies(access);
   },
   clearTokens(): void {
     if (typeof window === "undefined") return;
     localStorage.removeItem(TOKEN_KEYS.access);
     localStorage.removeItem(TOKEN_KEYS.refresh);
+    clearAuthCookies();
   },
   isLoggedIn(): boolean {
     return !!this.getAccessToken();
@@ -454,21 +458,8 @@ export function normalizePhone(phone: string): string {
   return digits;
 }
 
-// ── Server-safe public fetchers ───────────────────────────────────────────────
-
-export function searchListings(params: SearchListingsParams = {}) {
-  return request<ListingListResponse>(`/listings${buildQuery(params as Record<string, string | number | undefined>)}`, {
-    next: { revalidate: 60 },
-  });
-}
-
-export function getListing(id: string) {
-  return request<Listing>(`/listings/${id}`, { next: { revalidate: 60 } });
-}
-
-export function getDealerStore(slug: string) {
-  return request<DealerStore>(`/dealer-stores/${slug}`, { next: { revalidate: 120 } });
-}
+// ── Server-only fetchers (use in Server Components) ─────────────────────────
+// Import from @/lib/api-server instead of here.
 
 // ── Full API client (browser; uses localStorage tokens) ───────────────────────
 
@@ -539,10 +530,11 @@ export const api = {
     search(params: SearchListingsParams = {}) {
       return request<ListingListResponse>(
         `/listings${buildQuery(params as Record<string, string | number | undefined>)}`,
+        { auth: true },
       );
     },
     get(id: string) {
-      return request<Listing>(`/listings/${id}`);
+      return request<Listing>(`/listings/${id}`, { auth: true });
     },
     getMine(params: { page?: number; limit?: number } = {}) {
       return request<ListingListResponse>(
@@ -614,7 +606,7 @@ export const api = {
       return request<DealerStore>("/dealer-stores", { method: "POST", body: data, auth: true });
     },
     getBySlug(slug: string) {
-      return request<DealerStore>(`/dealer-stores/${slug}`);
+      return request<DealerStore>(`/dealer-stores/${slug}`, { auth: true });
     },
     updateMine(data: Partial<DealerStoreCreateInput>) {
       return request<DealerStore>("/dealer-stores/me", { method: "PATCH", body: data, auth: true });

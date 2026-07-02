@@ -88,6 +88,7 @@ async def my_dealer_listings(
 @router.get("/{slug}", response_model=DealerStoreOut)
 async def get_dealer_store(
     slug: str,
+    user: Annotated[UserModel, Depends(get_current_user)],
     db: Annotated[AsyncSession, Depends(get_db)],
 ) -> DealerStoreOut:
     service = DealerService(db)

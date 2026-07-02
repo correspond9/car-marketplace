@@ -1,5 +1,5 @@
 import { ListingCard } from "@/components/ListingCard";
-import { searchListings } from "@/lib/api";
+import { searchListings } from "@/lib/api-server";
 import { buildListingImageSlots } from "@/lib/listingImages";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;

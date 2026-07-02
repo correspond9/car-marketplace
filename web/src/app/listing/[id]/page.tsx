@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ListingActions } from "@/components/ListingActions";
 import { TrackListingView } from "@/components/TrackListingView";
-import { formatPrice, getListing } from "@/lib/api";
+import { formatPrice } from "@/lib/api";
+import { getListing } from "@/lib/api-server";
 import { getListingFallbackImage, imageSlotFromVariant, resolveListingImageSrc } from "@/lib/listingImages";
 
 type Props = { params: Promise<{ id: string }> };

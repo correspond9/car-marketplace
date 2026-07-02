@@ -39,7 +39,7 @@ export default function RootLayout({
         <AuthProvider>
           <BrandProvider>
             <SiteHeader />
-            <div className="flex-1">{children}</div>
+            <div className="relative flex flex-1 flex-col">{children}</div>
             <SiteFooter />
           </BrandProvider>
         </AuthProvider>

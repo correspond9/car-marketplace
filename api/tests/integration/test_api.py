@@ -62,7 +62,7 @@ async def test_create_and_search_listing(client: AsyncClient, auth_headers: dict
     assert publish.status_code == 200
     assert publish.json()["status"] == "pending_review"
 
-    search = await client.get("/api/v1/listings", params={"q": "Swift"})
+    search = await client.get("/api/v1/listings", params={"q": "Swift"}, headers=auth_headers)
     assert search.status_code == 200
     assert search.json()["total"] == 0
 

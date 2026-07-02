@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { api, tokenStorage, type UserMe } from "@/lib/api";
+import { setAuthCookies } from "@/lib/auth-cookie";
 
 type AuthContextValue = {
   user: UserMe | null;
@@ -34,6 +35,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     refreshUser().finally(() => setLoading(false));
   }, [refreshUser]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (tokenStorage.isLoggedIn()) {
+      const access = tokenStorage.getAccessToken();
+      if (access) setAuthCookies(access);
+    }
+  }, []);
 
   const logout = useCallback(async () => {
     await api.auth.logout();

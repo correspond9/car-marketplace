@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ListingCard } from "@/components/ListingCard";
-import { searchListings } from "@/lib/api";
+import { searchListings } from "@/lib/api-server";
 import { buildListingImageSlots } from "@/lib/listingImages";
 
 type Props = { params: Promise<{ city: string }> };

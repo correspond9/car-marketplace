@@ -52,10 +52,10 @@ function LoginForm() {
   }
 
   return (
-    <main className="mx-auto max-w-md px-4 py-12">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10">
       <div className="animate-fade-up">
-        <h1 className="text-2xl font-bold text-slate-900">Log in to Car-Market</h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <h1 className="text-2xl font-bold text-white drop-shadow-sm">Log in to Car-Market</h1>
+        <p className="mt-2 text-sm text-slate-200 drop-shadow-sm">
           Enter your mobile number. We will send a one-time password (OTP) to verify you.
         </p>
 
@@ -114,13 +114,13 @@ function LoginForm() {
         </form>
       )}
 
-      <p className="mt-6 text-center text-xs text-slate-500">
+      <p className="mt-6 text-center text-xs text-slate-300 drop-shadow-sm">
         By continuing, you agree to our{" "}
-        <Link href="/terms" className="text-emerald-700 hover:underline">
+        <Link href="/terms" className="text-emerald-300 hover:underline">
           Terms
         </Link>{" "}
         and{" "}
-        <Link href="/privacy" className="text-emerald-700 hover:underline">
+        <Link href="/privacy" className="text-emerald-300 hover:underline">
           Privacy Policy
         </Link>
         .
@@ -132,7 +132,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<main className="px-4 py-12 text-center text-slate-600">Loading…</main>}>
+    <Suspense fallback={<main className="px-4 py-12 text-center text-slate-200">Loading…</main>}>
       <LoginForm />
     </Suspense>
   );

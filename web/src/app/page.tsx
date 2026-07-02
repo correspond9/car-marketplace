@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ListingCard, buildListingImageSlots } from "@/components/ListingCard";
-import { searchListings } from "@/lib/api";
+import { searchListings } from "@/lib/api-server";
 
 export default async function HomePage() {
   let listings: Awaited<ReturnType<typeof searchListings>>["items"] = [];
