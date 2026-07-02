@@ -12,8 +12,8 @@ const faqs = [
     a: "Original RC, valid insurance, PUC certificate, service records, and Form 35 if hypothecation was closed. Match the engine and chassis numbers with the RC.",
   },
   {
-    q: "Is CarMarket involved in the sale?",
-    a: "No. CarMarket is an intermediary platform connecting buyers and sellers. The sale agreement is directly between users.",
+    q: "Is Car-Market involved in the sale?",
+    a: "No. Car-Market is an intermediary platform connecting buyers and sellers. The sale agreement is directly between users.",
   },
   {
     q: "How do I contact a seller?",
@@ -31,7 +31,7 @@ export default function HelpPage() {
       <SiteHeader />
       <main className="mx-auto max-w-3xl flex-1 px-4 py-12">
         <h1 className="text-3xl font-bold text-slate-900">Help centre</h1>
-        <p className="mt-2 text-slate-600">Common questions about buying and selling used cars on CarMarket.</p>
+        <p className="mt-2 text-slate-600">Common questions about buying and selling used cars on Car-Market.</p>
         <div className="mt-8 space-y-6">
           {faqs.map((item) => (
             <section key={item.q} className="rounded-xl border border-slate-200 bg-white p-6">

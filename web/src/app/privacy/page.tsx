@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "How CarMarket India collects, uses, and protects your personal data under DPDP Act.",
+  description: "How Car-Market India collects, uses, and protects your personal data under DPDP Act.",
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
 
         <Section title="1. Introduction">
           <p>
-            CarMarket India (&quot;we&quot;, &quot;us&quot;) respects your privacy. This policy explains how we collect, use, store,
+            Car-Market India (&quot;we&quot;, &quot;us&quot;) respects your privacy. This policy explains how we collect, use, store,
             and share personal data when you use our website and mobile applications. We process data in accordance
             with the Digital Personal Data Protection Act, 2023 (DPDP Act) and applicable rules.
           </p>

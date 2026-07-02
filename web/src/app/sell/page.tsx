@@ -37,10 +37,11 @@ const emptyForm: ListingCreateInput = {
   service_history_available: false,
   exchange_accepted: false,
   test_drive_available: true,
+  show_contact_publicly: false,
 };
 
 export default function SellPage() {
-  const { isLoggedIn, loading: authLoading } = useAuth();
+  const { isLoggedIn, loading: authLoading, user } = useAuth();
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<ListingCreateInput>(emptyForm);
@@ -54,6 +55,12 @@ export default function SellPage() {
   useEffect(() => {
     if (!authLoading && !isLoggedIn) router.replace("/login?redirect=/sell");
   }, [authLoading, isLoggedIn, router]);
+
+  useEffect(() => {
+    if (user?.role === "dealer") {
+      setForm((prev) => ({ ...prev, show_contact_publicly: true }));
+    }
+  }, [user?.role]);
 
   function updateField<K extends keyof ListingCreateInput>(key: K, value: ListingCreateInput[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -228,6 +235,14 @@ export default function SellPage() {
               onChange={(e) => updateField("test_drive_available", e.target.checked)}
             />
             Test drive available
+          </label>
+          <label className="flex items-center gap-2 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={form.show_contact_publicly ?? false}
+              onChange={(e) => updateField("show_contact_publicly", e.target.checked)}
+            />
+            Show my phone number on the listing (dealers: on by default)
           </label>
           <div className="flex gap-3">
             <button type="button" onClick={() => setStep(1)} className="flex-1 rounded-lg border py-3">

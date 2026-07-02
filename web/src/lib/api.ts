@@ -43,6 +43,22 @@ export type SortOption =
   | "newest"
   | "lowest_km";
 
+export type ModerationMode = "manual" | "auto";
+
+export type PlatformSettings = {
+  brand_name: string;
+  brand_domain: string;
+  logo_url: string | null;
+};
+
+export type PlatformSettingsAdmin = PlatformSettings & {
+  moderation_mode: ModerationMode;
+  enable_featured_listings: boolean;
+  enable_dealer_subscriptions: boolean;
+  enable_paid_listings: boolean;
+  updated_at: string;
+};
+
 export type ApiErrorBody = {
   error: { code: string; message: string; details?: string[] };
 };
@@ -121,11 +137,14 @@ export type Listing = {
   locality: string | null;
   pincode: string | null;
   test_drive_available: boolean;
+  show_contact_publicly?: boolean;
   status: ListingStatus;
   published_at: string | null;
   expires_at: string | null;
   created_at: string;
   images: ListingImage[];
+  seller_contact_phone?: string | null;
+  is_featured?: boolean;
 };
 
 export type ListingListResponse = {
@@ -166,6 +185,7 @@ export type ListingCreateInput = {
   locality?: string | null;
   pincode?: string | null;
   test_drive_available?: boolean;
+  show_contact_publicly?: boolean;
 };
 
 export type ListingUpdateInput = Partial<ListingCreateInput>;
@@ -234,7 +254,27 @@ export type Inquiry = {
   message: string;
   status: InquiryStatus;
   created_at: string;
+  seller_phone?: string | null;
+  buyer_phone?: string | null;
   listing?: Listing;
+};
+
+export type InquiryListResponse = {
+  items: Inquiry[];
+  total: number;
+  page: number;
+  limit: number;
+};
+
+export type RecentlyViewedItem = {
+  listing_id: string;
+  viewed_at: string;
+  listing: Listing | null;
+};
+
+export type RecentlyViewedListResponse = {
+  items: RecentlyViewedItem[];
+  total: number;
 };
 
 export type Review = {
@@ -487,6 +527,12 @@ export const api = {
     getPublic(id: string) {
       return request<UserPublic>(`/users/${id}`);
     },
+    recentlyViewed() {
+      return request<RecentlyViewedListResponse>("/users/me/recently-viewed", { auth: true });
+    },
+    trackListingView(listingId: string) {
+      return request<void>(`/listings/${listingId}/view`, { method: "POST", auth: true });
+    },
   },
 
   listings: {
@@ -583,23 +629,35 @@ export const api = {
 
   inquiries: {
     create(listingId: string, message: string) {
-      return request<Inquiry>("/inquiries", {
+      return request<Inquiry>(`/listings/${listingId}/inquiries`, {
         method: "POST",
-        body: { listing_id: listingId, message },
+        body: { message },
         auth: true,
       });
     },
     listSent(params: { page?: number; limit?: number } = {}) {
-      return request<Inquiry[]>(
+      return request<InquiryListResponse>(
         `/inquiries/sent${buildQuery(params as Record<string, string | number | undefined>)}`,
         { auth: true },
       );
     },
-    listReceived(params: { page?: number; limit?: number } = {}) {
-      return request<Inquiry[]>(
-        `/inquiries/received${buildQuery(params as Record<string, string | number | undefined>)}`,
+    listInbox(params: { page?: number; limit?: number } = {}) {
+      return request<InquiryListResponse>(
+        `/inquiries/inbox${buildQuery(params as Record<string, string | number | undefined>)}`,
         { auth: true },
       );
+    },
+    accept(inquiryId: string) {
+      return request<Inquiry>(`/inquiries/${inquiryId}/accept`, {
+        method: "PATCH",
+        auth: true,
+      });
+    },
+    decline(inquiryId: string) {
+      return request<Inquiry>(`/inquiries/${inquiryId}/decline`, {
+        method: "PATCH",
+        auth: true,
+      });
     },
   },
 
@@ -661,6 +719,48 @@ export const api = {
       return request<Listing>(`/moderation/listings/${listingId}/reject`, {
         method: "POST",
         body: { reason },
+        auth: true,
+      });
+    },
+  },
+
+  platform: {
+    getSettings() {
+      return request<PlatformSettings>("/platform/settings");
+    },
+  },
+
+  admin: {
+    getPlatformSettings() {
+      return request<PlatformSettingsAdmin>("/admin/platform-settings", { auth: true });
+    },
+    updatePlatformSettings(data: Partial<Omit<PlatformSettingsAdmin, "updated_at">>) {
+      return request<PlatformSettingsAdmin>("/admin/platform-settings", {
+        method: "PATCH",
+        body: data,
+        auth: true,
+      });
+    },
+    async uploadLogo(file: File) {
+      const presign = await request<{ upload_url: string; storage_key: string }>(
+        "/admin/platform-settings/logo/presign",
+        {
+          method: "POST",
+          body: { filename: file.name, content_type: file.type || "image/png" },
+          auth: true,
+        },
+      );
+      const uploadResponse = await fetch(presign.upload_url, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type || "image/png" },
+      });
+      if (!uploadResponse.ok) {
+        throw new ApiError(uploadResponse.status, "UPLOAD_FAILED", "Logo upload failed");
+      }
+      return request<PlatformSettingsAdmin>("/admin/platform-settings/logo/confirm", {
+        method: "POST",
+        body: { storage_key: presign.storage_key },
         auth: true,
       });
     },

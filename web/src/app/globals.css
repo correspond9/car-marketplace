@@ -3,12 +3,86 @@
 @tailwind utilities;
 
 :root {
-  --background: #f8fafc;
+  --background: #eef2f6;
   --foreground: #0f172a;
+  --glass-surface: rgba(255, 255, 255, 0.86);
+  --glass-border: rgba(255, 255, 255, 0.95);
+  --glass-edge: rgba(226, 232, 240, 0.85);
+  --emerald-accent: #15803d;
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background: linear-gradient(165deg, #f0fdf4 0%, #eef2f6 45%, #f8fafc 100%);
+  background-attachment: fixed;
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+@layer components {
+  .matte-glass {
+    @apply rounded-2xl border border-[var(--glass-edge)] bg-[var(--glass-surface)];
+    box-shadow: 0 8px 32px -10px rgba(15, 23, 42, 0.12), 0 2px 6px -2px rgba(15, 23, 42, 0.06);
+  }
+
+  .matte-glass-header {
+    @apply border-b border-slate-200/50 bg-white/80 shadow-sm backdrop-blur-md;
+  }
+
+  .matte-glass-hero {
+    @apply rounded-2xl border border-emerald-100/80;
+    background-color: rgba(255, 255, 255, 0.78);
+    box-shadow: 0 8px 32px -10px rgba(15, 23, 42, 0.12), 0 2px 6px -2px rgba(15, 23, 42, 0.06);
+  }
+
+  .btn-matte-primary {
+    @apply rounded-xl bg-emerald-700 px-6 py-3 font-semibold text-white shadow-sm transition duration-200 hover:bg-emerald-800 hover:shadow-md active:scale-[0.98];
+  }
+
+  .btn-matte-secondary {
+    @apply rounded-xl border border-slate-200/90 bg-white/70 px-6 py-3 font-semibold text-emerald-800 shadow-sm transition duration-200 hover:bg-white active:scale-[0.98];
+  }
+
+  .input-matte {
+    @apply w-full rounded-xl border border-slate-200/90 bg-white/90 px-3 py-2.5 shadow-inner shadow-slate-900/5 transition focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20;
+  }
+
+  .animate-fade-up {
+    animation: fade-up 0.28s ease-out both;
+  }
+
+  .stagger-children > * {
+    animation: fade-up 0.28s ease-out both;
+  }
+
+  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2) { animation-delay: 40ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 80ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 120ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 160ms; }
+  .stagger-children > *:nth-child(6) { animation-delay: 200ms; }
+  .stagger-children > *:nth-child(7) { animation-delay: 240ms; }
+  .stagger-children > *:nth-child(8) { animation-delay: 280ms; }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .stagger-children > * {
+    animation: none !important;
+  }
+
+  .btn-matte-primary,
+  .btn-matte-secondary {
+    transition: none;
+  }
 }

@@ -53,40 +53,37 @@ function LoginForm() {
 
   return (
     <main className="mx-auto max-w-md px-4 py-12">
-      <h1 className="text-2xl font-bold text-slate-900">Log in to CarMarket</h1>
-      <p className="mt-2 text-sm text-slate-600">
-        Enter your mobile number. We will send a one-time password (OTP) to verify you.
-      </p>
+      <div className="animate-fade-up">
+        <h1 className="text-2xl font-bold text-slate-900">Log in to Car-Market</h1>
+        <p className="mt-2 text-sm text-slate-600">
+          Enter your mobile number. We will send a one-time password (OTP) to verify you.
+        </p>
 
-      {step === "phone" ? (
-        <form onSubmit={handleRequestOtp} className="mt-8 space-y-4 rounded-xl border border-slate-200 bg-white p-6">
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-slate-700">
-              Mobile number
-            </label>
-            <input
-              id="phone"
-              type="tel"
-              inputMode="numeric"
-              placeholder="10-digit mobile number"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-            />
-            <p className="mt-1 text-xs text-slate-500">Example: {normalizePhone("9876543210")}</p>
-          </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-emerald-700 py-3 font-semibold text-white hover:bg-emerald-800 disabled:opacity-60"
-          >
-            {loading ? "Sending OTP…" : "Send OTP"}
-          </button>
-        </form>
-      ) : (
-        <form onSubmit={handleVerifyOtp} className="mt-8 space-y-4 rounded-xl border border-slate-200 bg-white p-6">
+        {step === "phone" ? (
+          <form onSubmit={handleRequestOtp} className="matte-glass mt-8 space-y-4 p-6">
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-slate-700">
+                Mobile number
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                inputMode="numeric"
+                placeholder="10-digit mobile number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+                className="input-matte mt-1"
+              />
+              <p className="mt-1 text-xs text-slate-500">Example: {normalizePhone("9876543210")}</p>
+            </div>
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            <button type="submit" disabled={loading} className="btn-matte-primary w-full disabled:opacity-60">
+              {loading ? "Sending OTP…" : "Send OTP"}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyOtp} className="matte-glass mt-8 space-y-4 p-6">
           <p className="text-sm text-slate-600">
             OTP sent to <strong>{normalizePhone(phone)}</strong>.{" "}
             <button type="button" onClick={() => setStep("phone")} className="text-emerald-700 hover:underline">
@@ -107,15 +104,11 @@ function LoginForm() {
               required
               minLength={4}
               maxLength={8}
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 tracking-widest"
+              className="input-matte mt-1 tracking-widest"
             />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-emerald-700 py-3 font-semibold text-white hover:bg-emerald-800 disabled:opacity-60"
-          >
+          <button type="submit" disabled={loading} className="btn-matte-primary w-full disabled:opacity-60">
             {loading ? "Verifying…" : "Verify & log in"}
           </button>
         </form>
@@ -132,6 +125,7 @@ function LoginForm() {
         </Link>
         .
       </p>
+      </div>
     </main>
   );
 }

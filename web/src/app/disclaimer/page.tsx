@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Disclaimer",
-  description: "Important disclaimers for CarMarket India used car marketplace.",
+  description: "Important disclaimers for Car-Market India used car marketplace.",
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -24,7 +24,7 @@ export default function DisclaimerPage() {
 
         <Section title="Platform role">
           <p>
-            CarMarket is an <strong>online intermediary</strong> that provides a venue for users to list and discover used
+            Car-Market is an <strong>online intermediary</strong> that provides a venue for users to list and discover used
             vehicles. We are not a motor vehicle dealer, broker, insurer, or financier unless explicitly stated for a
             specific product. We do not take possession of vehicles or buyer payments for the sale itself.
           </p>
@@ -42,7 +42,7 @@ export default function DisclaimerPage() {
         <Section title="Vehicle history">
           <p>
             Odometer readings, accident history, service records, and ownership details depend on seller disclosure.
-            CarMarket is not responsible for odometer tampering, hidden defects, or title disputes unless caused by
+            Car-Market is not responsible for odometer tampering, hidden defects, or title disputes unless caused by
             our gross negligence.
           </p>
         </Section>
@@ -63,7 +63,7 @@ export default function DisclaimerPage() {
 
         <Section title="Investment & advice">
           <p>
-            Nothing on CarMarket constitutes financial, legal, or mechanical advice. Consult qualified professionals
+            Nothing on Car-Market constitutes financial, legal, or mechanical advice. Consult qualified professionals
             before significant purchase decisions.
           </p>
         </Section>

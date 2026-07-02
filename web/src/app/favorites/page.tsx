@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { ListingCard } from "@/components/ListingCard";
 import { api, ApiError, type Listing } from "@/lib/api";
+import { buildListingImageSlots } from "@/lib/listingImages";
 
 export default function FavoritesPage() {
   const { isLoggedIn, loading: authLoading } = useAuth();
@@ -34,6 +35,8 @@ export default function FavoritesPage() {
       .finally(() => setLoading(false));
   }, [isLoggedIn]);
 
+  const imageSlots = buildListingImageSlots(listings);
+
   if (authLoading || loading) {
     return <main className="px-4 py-12 text-center text-slate-600">Loading favorites…</main>;
   }
@@ -55,7 +58,7 @@ export default function FavoritesPage() {
       ) : (
         <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {listings.map((listing) => (
-            <ListingCard key={listing.id} listing={listing} />
+            <ListingCard key={listing.id} listing={listing} imageSlot={imageSlots.get(listing.id) ?? 0} />
           ))}
         </div>
       )}

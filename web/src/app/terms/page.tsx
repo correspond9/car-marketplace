@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Terms of Use",
-  description: "CarMarket India terms of use for buyers, sellers, and dealers.",
+  description: "Car-Market India terms of use for buyers, sellers, and dealers.",
 };
 
 export default function TermsPage() {
@@ -14,9 +14,9 @@ export default function TermsPage() {
       <p className="text-sm text-slate-500">Last updated: 2 July 2026</p>
 
       <section>
-      <h2 className="text-xl font-semibold text-slate-900">1. About CarMarket</h2>
+      <h2 className="text-xl font-semibold text-slate-900">1. About Car-Market</h2>
       <p>
-        CarMarket (&quot;Platform&quot;, &quot;we&quot;, &quot;us&quot;) operates an online marketplace that connects buyers and
+        Car-Market (&quot;Platform&quot;, &quot;we&quot;, &quot;us&quot;) operates an online marketplace that connects buyers and
         sellers of used motor vehicles in India. We act as an <strong>intermediary</strong> under the Information
         Technology Act, 2000 and the Information Technology (Intermediary Guidelines and Digital Media Ethics
         Code) Rules, 2021. We do not own the vehicles listed and are not a party to transactions between users.
@@ -53,7 +53,7 @@ export default function TermsPage() {
       <h2 className="text-xl font-semibold text-slate-900">5. Transactions</h2>
       <p>
         All price negotiations, payments, registration transfer, and delivery are solely between buyer and seller.
-        CarMarket does not guarantee vehicle condition, title, or completion of sale. Users should inspect vehicles
+        Car-Market does not guarantee vehicle condition, title, or completion of sale. Users should inspect vehicles
         and verify documents independently.
       </p>
       </section>
@@ -69,7 +69,7 @@ export default function TermsPage() {
       <section>
       <h2 className="text-xl font-semibold text-slate-900">7. Limitation of liability</h2>
       <p>
-        To the maximum extent permitted by law, CarMarket is not liable for indirect, incidental, or consequential
+        To the maximum extent permitted by law, Car-Market is not liable for indirect, incidental, or consequential
         damages arising from use of the Platform or user interactions. Our aggregate liability shall not exceed fees
         paid to us in the preceding twelve months, if any.
       </p>

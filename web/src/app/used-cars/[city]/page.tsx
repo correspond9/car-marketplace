@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ListingCard } from "@/components/ListingCard";
 import { searchListings } from "@/lib/api";
+import { buildListingImageSlots } from "@/lib/listingImages";
 
 type Props = { params: Promise<{ city: string }> };
 
@@ -34,6 +35,7 @@ export default async function CityLandingPage({ params }: Props) {
   } catch {
     listings = [];
   }
+  const imageSlots = buildListingImageSlots(listings);
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
@@ -60,7 +62,7 @@ export default async function CityLandingPage({ params }: Props) {
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {listings.map((listing) => (
-          <ListingCard key={listing.id} listing={listing} />
+          <ListingCard key={listing.id} listing={listing} imageSlot={imageSlots.get(listing.id) ?? 0} />
         ))}
       </div>
 
