@@ -35,7 +35,7 @@ export function LoginBackgroundVideo() {
       {!failed ? (
         <video
           ref={videoRef}
-          className="login-bg-video absolute inset-0 h-full w-full object-cover"
+          className="login-bg-video absolute inset-0 h-full w-full bg-slate-950 object-contain sm:object-cover"
           autoPlay
           muted
           loop

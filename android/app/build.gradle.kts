@@ -22,8 +22,8 @@ android {
         applicationId = "in.carmarket.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "0.1.4"
+        versionCode = 6
+        versionName = "0.1.5"
         buildConfigField("String", "API_BASE_URL", "\"https://api.auto.linkpc.net/api/v1/\"")
     }
 
@@ -97,5 +97,7 @@ dependencies {
     kapt(libs.moshi.codegen)
     implementation(libs.coil.compose)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }
